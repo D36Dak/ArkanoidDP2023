@@ -1,0 +1,142 @@
+﻿@page "/game"
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Timers
+@using Arkanoid.Data
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<PageTitle>Game</PageTitle>
+
+<h1>Game view</h1>
+
+<button class="btn btn-primary" disabled="@(!canStart)" @onclick="StartTimer">Start</button>
+<button class="btn btn-primary" @onclick="StopTimer">Stop</button>
+<button class="btn btn-primary" @onclick="ResetPosition">Reset</button>
+<input @bind="speedX" size="50" type="number" step="1" required="true" />
+<input @bind="speedY" size="50" type="number" step="1" required="true" />
+<button class="btn btn-primary" @onclick="SetSpeed">Set speed</button>
+<div>
+    <p>Player 1</p>
+    <button class="btn btn-primary" @onclick="P1.MoveRight">Right</button>
+    <button class="btn btn-primary" @onclick="P1.MoveLeft">Left</button>
+</div>
+<div>
+    <p>Player2</p>
+    <button class="btn btn-primary" @onclick="P2.MoveRight">Right</button>
+    <button class="btn btn-primary" @onclick="P2.MoveLeft">Left</button>
+</div>
+
+@* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
+<div id="level"
+     style="background-color: #000000; width: @(gameWindow.GetWidth())px; height: @(gameWindow.GetHeight())px; margin: auto"
+     tabindex="0">
+    <div style="color: white; top: @(ball.GetY())px; left: @(ball.GetX())px; width: 1px; position: relative"><img width="@ballSize" height="@ballSize" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
+    <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:blue; top:@(gameWindow.GetHeight()-60)px; left:@(P1.GetX())px; position:relative; display:inline-block"></div>
+    <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:blue; top:@(gameWindow.GetHeight()-60)px; left:@(gameWindow.GetWidth()/2-P2.GetWidth()+2+P2.GetX())px; position:relative; display:inline-block"></div>
+</div>
+<br />
+
+@code {
+    private GameWindow gameWindow = new GameWindow();
+    private HubConnection? hubConnection;
+    private int currentCount = 0;
+    private Ball ball;
+    private Paddle P1;
+    private Paddle P2;
+    // private int top = 0;
+    // private int left = 0;
+    private Timer? timer;
+    private int ballSize = 20;
+    int speedY = 1;
+    int speedX = 5;
+    bool canStart = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ball = new Ball(gameWindow);
+        ball.SetSpeed(speedX, speedY);
+        P1 = new Paddle(200);
+        P2 = new Paddle(200);
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
+        .Build();
+
+        hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
+        {
+            if (tag=="ball")
+            {
+                ball.SetPosition(x, y);
+                // top = y;
+                // left = x;
+                InvokeAsync(StateHasChanged);
+            }
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendPosition", ball.GetX(), ball.GetY(), "ball");
+        }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    private async Task StartTimer()
+    {
+        timer = new Timer();
+        timer.Interval = 16;
+        timer.Elapsed += TimerElapsed;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+        canStart = false;
+    }
+
+    private async Task StopTimer()
+    {
+        if (timer is not null)
+        {
+            timer.Enabled = false;
+        }
+        canStart = true;
+    }
+
+    private async Task ResetPosition()
+    {
+        ball.SetPosition(0, 0);
+        // top = 0; left = 0;
+        Send();
+    }
+
+    private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        ball.Update();
+        // IncrementLeft();
+        // IncrementTop();
+        Send();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+    //----------------------------------------
+
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+    //-----------------------------------
+    private async Task SetSpeed()
+    {
+        ball.SetSpeed(speedX, speedY);
+    }
+}
