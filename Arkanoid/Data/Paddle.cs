@@ -7,6 +7,7 @@
         private int Height = 20;
         public string id { get; set; }
         public Side side { get; set; }
+        public string color = "blue";
 
         public Paddle(int x, string id, Side side)
         {

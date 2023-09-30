@@ -93,5 +93,9 @@ namespace Arkanoid.Data
             this.Y = y;
             //Console.WriteLine(String.Format("Position after set {0} : {1}", X, Y));
         }
+        public int GetSize()
+        {
+            return this.BallSize;
+        }
     }
 }
