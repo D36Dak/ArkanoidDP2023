@@ -25,8 +25,8 @@ namespace Arkanoid.Data
                 .Build();
             hubConnection.StartAsync();
             Ball = new Ball(Window);
-            P1 = new Paddle(200, "", Side.LEFT);
-            P2 = new Paddle(200, "", Side.RIGHT);
+            P1 = new Paddle(200, "", Side.LEFT, Ball);
+            P2 = new Paddle(200, "", Side.RIGHT, Ball);
             SetupTimer();
         }
         private void SetupTimer()
