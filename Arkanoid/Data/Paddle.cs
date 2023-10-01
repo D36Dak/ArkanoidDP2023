@@ -51,14 +51,24 @@
         {
             X -= 5;
         }
+        private int GetAbsolutePosition()
+        {
+            if (side == Side.RIGHT)
+            {
+                return X + Ball.GetWindowHeight()/2 + Width + 2 + 80;
+            }
+            else
+            {
+                return X;
+            }
+        }
 
         public void Update()
         {
-            if(Ball != null)
+            if (Ball != null)
             {
-                if(Ball.GetY() > Ball.GetWindowHeight()-60 && Ball.SpeedY > 0 && Ball.GetX() < X + Width && Ball.GetX() > X)
-                {
-                    
+                if(Ball.GetY() > Ball.GetWindowHeight()-60 && Ball.SpeedY > 0 && Ball.GetX() < GetAbsolutePosition() + Width && Ball.GetX() > GetAbsolutePosition())
+                {                    
                     Ball.InvertY();
                 }
             }

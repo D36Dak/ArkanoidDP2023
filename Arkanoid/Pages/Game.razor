@@ -38,7 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        GE = new GameEngine(Navigation);
+        GE = GameEngine.GetInstance(Navigation);
         await GE.SetSpeed(speedX, speedY);
         P1 = GE.P1;
         P2 = GE.P2;
