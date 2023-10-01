@@ -56,9 +56,9 @@
         {
             if(Ball != null)
             {
-                Console.WriteLine($"{Ball.SpeedY} | {Ball.GetY()}");
-                if(Ball.GetY() < 700 && Ball.SpeedY > 0 && Ball.GetX() < X + Width && Ball.GetX() > X)
+                if(Ball.GetY() > Ball.GetWindowHeight()-60 && Ball.SpeedY > 0 && Ball.GetX() < X + Width && Ball.GetX() > X)
                 {
+                    
                     Ball.InvertY();
                 }
             }

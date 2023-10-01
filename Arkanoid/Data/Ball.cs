@@ -100,6 +100,10 @@ namespace Arkanoid.Data
         {
             return this.BallSize;
         }
+        public int GetWindowHeight()
+        {
+            return this.GameWindow.GetHeight();
+        }
 
         public void Attach(IObserver observer)
         {
