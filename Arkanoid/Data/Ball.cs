@@ -4,14 +4,16 @@ using System.Security.Cryptography.Xml;
 
 namespace Arkanoid.Data
 {
-    public class Ball
+    public class Ball : ISubject
     {
         private int X;
         private int Y;
         private int SpeedX;
-        private int SpeedY;
+        public int SpeedY { get; private set; }
         private int BallSize = 20;
         private GameWindow GameWindow;
+
+        public List<IObserver> Observers = new();
 
         public Ball(GameWindow gameWindow)
         {
@@ -74,6 +76,7 @@ namespace Arkanoid.Data
                 y1 = GetNextY();
             }
             SetPosition(x1, y1);
+            NotifyAll();
             //Console.WriteLine("Next position should be {0} : {1}",x1, y1);
             //Console.WriteLine(String.Format("{0} : {1}",SpeedX,SpeedY));
             //IncrementLeft();
@@ -92,6 +95,32 @@ namespace Arkanoid.Data
             this.X = x;
             this.Y = y;
             //Console.WriteLine(String.Format("Position after set {0} : {1}", X, Y));
+        }
+        public int GetSize()
+        {
+            return this.BallSize;
+        }
+        public int GetWindowHeight()
+        {
+            return this.GameWindow.GetHeight();
+        }
+
+        public void Attach(IObserver observer)
+        {
+            Observers.Add(observer);
+        }
+
+        public void UnAttach(IObserver observer)
+        {
+            Observers.Remove(observer);
+        }
+
+        public void NotifyAll()
+        {
+            foreach(var observer in Observers)
+            {
+                observer.Update();
+            }
         }
     }
 }

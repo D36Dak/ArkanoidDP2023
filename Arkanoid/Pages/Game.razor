@@ -8,72 +8,50 @@
 <PageTitle>Game</PageTitle>
 
 <h1>Game view</h1>
+    <button class="btn btn-primary" disabled="@(!canStart)" @onclick="GE.StartTimer">Start</button>
+    <button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
+    <button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
+    <button class="btn btn-primary" @onclick="Subscribe">Join game</button>
 
-<button class="btn btn-primary" disabled="@(!canStart)" @onclick="StartTimer">Start</button>
-<button class="btn btn-primary" @onclick="StopTimer">Stop</button>
-<button class="btn btn-primary" @onclick="ResetPosition">Reset</button>
-<input @bind="speedX" size="50" type="number" step="1" required="true" />
-<input @bind="speedY" size="50" type="number" step="1" required="true" />
-<button class="btn btn-primary" @onclick="SetSpeed">Set speed</button>
-<div>
-    <p>Player 1</p>
-    <button class="btn btn-primary" @onclick="P1.MoveRight">Right</button>
-    <button class="btn btn-primary" @onclick="P1.MoveLeft">Left</button>
-</div>
-<div>
-    <p>Player2</p>
-    <button class="btn btn-primary" @onclick="P2.MoveRight">Right</button>
-    <button class="btn btn-primary" @onclick="P2.MoveLeft">Left</button>
-</div>
+    @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
+    <div id="level" @onkeypress="KeyPressEvent"
+         style="background-color: #000000; width: @(GE.GetWindowWidth())px; height: @(GE.GetWindowHeight())px; margin: auto"
+         tabindex="0">
+        <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
+        <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:relative; display:inline-block"></div>
+        <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(GE.GetWindowWidth()/2-P2.GetWidth()+2+P2.GetX())px; position:relative; display:inline-block"></div>
+    </div>
 
-@* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
-<div id="level" @onkeypress="KeyPressEvent"
-     style="background-color: #000000; width: @(gameWindow.GetWidth())px; height: @(gameWindow.GetHeight())px; margin: auto"
-     tabindex="0">
-    <div style="color: white; top: @(ball.GetY())px; left: @(ball.GetX())px; width: 1px; position: relative"><img width="@ballSize" height="@ballSize" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
-    <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:blue; top:@(gameWindow.GetHeight()-60)px; left:@(P1.GetX())px; position:relative; display:inline-block"></div>
-    <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:blue; top:@(gameWindow.GetHeight()-60)px; left:@(gameWindow.GetWidth()/2-P2.GetWidth()+2+P2.GetX())px; position:relative; display:inline-block"></div>
-</div>
 <h4>@KeyPressed </h4>
 <br />
 
 @code {
-    private GameWindow gameWindow = new GameWindow();
+    private GameEngine? GE;
     private HubConnection? hubConnection;
-    private int currentCount = 0;
-    private Ball ball;
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
-    // private int top = 0;
-    // private int left = 0;
-    private Timer? timer;
-    private int ballSize = 20;
-    int speedY = 1;
-    int speedX = 5;
+    int speedY = 3;
+    int speedX = 3;
     bool canStart = true;
     string KeyPressed = "aaa";
 
     protected override async Task OnInitializedAsync()
     {
-        ball = new Ball(gameWindow);
-        ball.SetSpeed(speedX, speedY);
-        P1 = new Paddle(200, "", Side.LEFT);
-        P2 = new Paddle(200, "", Side.RIGHT);
+        GE = new GameEngine(Navigation);
+        await GE.SetSpeed(speedX, speedY);
+        P1 = GE.P1;
+        P2 = GE.P2;
 
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
 
-
-
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
             if (tag == "ball")
             {
-                ball.SetPosition(x, y);
-                // top = y;
-                // left = x;
+                GE.SetBallPosition(x, y);
                 InvokeAsync(StateHasChanged);
             }
         });
@@ -85,7 +63,7 @@
             {
                 p = P2;
             }
-            
+
             p.SetX(x);
             InvokeAsync(StateHasChanged);
         });
@@ -102,12 +80,14 @@
                 p = P1;
             }
             p.id = id;
-            
+
             // change player color to indicate that joined. later...
             if (id.Equals(hubConnection.ConnectionId))
             {
                 myPlayer = p;
+                myPlayer.color = "olive";
                 Console.WriteLine($"PaddleID {myPlayer.side}");
+                InvokeAsync(StateHasChanged);
             }
         });
 
@@ -128,7 +108,6 @@
 
         await hubConnection.StartAsync();
     }
-
     private async Task KeyPressEvent(KeyboardEventArgs args)
     {
         if (myPlayer == null) return;
@@ -155,51 +134,16 @@
             await hubConnection.SendAsync("SetPlayerPosition", p.GetX(), p.side);
         }
     }
-
-    private async Task Send()
+    private async Task Subscribe()
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("SendPosition", ball.GetX(), ball.GetY(), "ball");
+            await hubConnection.SendAsync("Subscribe", hubConnection.ConnectionId);
         }
     }
 
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
-
-    private async Task StartTimer()
-    {
-        timer = new Timer();
-        timer.Interval = 16;
-        timer.Elapsed += TimerElapsed;
-        timer.AutoReset = true;
-        timer.Enabled = true;
-        canStart = false;
-    }
-
-    private async Task StopTimer()
-    {
-        if (timer is not null)
-        {
-            timer.Enabled = false;
-        }
-        canStart = true;
-    }
-
-    private async Task ResetPosition()
-    {
-        ball.SetPosition(0, 0);
-        // top = 0; left = 0;
-        Send();
-    }
-
-    private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
-    {
-        ball.Update();
-        // IncrementLeft();
-        // IncrementTop();
-        Send();
-    }
 
     public async ValueTask DisposeAsync()
     {
@@ -209,15 +153,4 @@
         }
     }
     //----------------------------------------
-
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-    //-----------------------------------
-    private async Task SetSpeed()
-    {
-        ball.SetSpeed(speedX, speedY);
-    }
 }
