@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Arkanoid/Properties/ServiceDependencies/ArkanoidDP2023 - Web Deploy/profile.arm.json

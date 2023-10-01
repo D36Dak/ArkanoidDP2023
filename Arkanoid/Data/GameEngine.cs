@@ -1,4 +1,5 @@
 ﻿using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Timers;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
@@ -9,6 +10,7 @@ namespace Arkanoid.Data
     
     public class GameEngine:IAsyncDisposable
     {
+        private static GameEngine? Instance = null;
         private readonly NavigationManager Navigation;
         private HubConnection? hubConnection;
         private GameWindow Window = new GameWindow();
@@ -16,8 +18,9 @@ namespace Arkanoid.Data
         public Paddle P1;
         public Paddle P2;
         private System.Timers.Timer? timer;
+        private static object ThreadLock = new object();
 
-        public GameEngine(NavigationManager navManager)
+        private GameEngine(NavigationManager navManager)
         {
             Navigation = navManager;
             hubConnection = new HubConnectionBuilder()
@@ -28,6 +31,17 @@ namespace Arkanoid.Data
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(200, "", Side.RIGHT, Ball);
             SetupTimer();
+        }
+        public static GameEngine GetInstance(NavigationManager navigationManager)
+        {
+            lock (ThreadLock)
+            {
+                if (Instance is null)
+                {
+                    Instance = new GameEngine(navigationManager);
+                }
+                return Instance;
+            }
         }
         private void SetupTimer()
         {
