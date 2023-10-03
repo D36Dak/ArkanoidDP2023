@@ -100,6 +100,14 @@ namespace Arkanoid.Data
         {
             return this.BallSize;
         }
+        public int GetMiddleX()
+        {
+            return this.BallSize / 2 + X;
+        }
+        public int GetMiddleY()
+        {
+            return this.BallSize/2 + Y;
+        }
         public int GetWindowHeight()
         {
             return this.GameWindow.GetHeight();

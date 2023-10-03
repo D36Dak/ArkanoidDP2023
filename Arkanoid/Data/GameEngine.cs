@@ -29,7 +29,8 @@ namespace Arkanoid.Data
             hubConnection.StartAsync();
             Ball = new Ball(Window);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
-            P2 = new Paddle(200, "", Side.RIGHT, Ball);
+            P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            SetSpeed(3,3);
             SetupTimer();
         }
         public static GameEngine GetInstance(NavigationManager navigationManager)
@@ -105,6 +106,7 @@ namespace Arkanoid.Data
         }
         public int GetWindowWidth()
         {
+            Console.WriteLine(Window.GetWidth());
             return this.Window.GetWidth();
         }
         public int GetBallX()
