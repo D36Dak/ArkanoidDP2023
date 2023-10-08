@@ -1,14 +1,16 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Numerics;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using Arkanoid.Data.Tiles;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Arkanoid.Data
 {
-    
-    public class GameEngine:IAsyncDisposable
+
+    public class GameEngine : IAsyncDisposable
     {
         private static GameEngine? Instance = null;
         private readonly NavigationManager Navigation;
@@ -19,6 +21,7 @@ namespace Arkanoid.Data
         public Paddle P2;
         private System.Timers.Timer? timer;
         private static object ThreadLock = new object();
+        public List<Tile> Tiles = new();
 
         private GameEngine(NavigationManager navManager)
         {
@@ -30,8 +33,10 @@ namespace Arkanoid.Data
             Ball = new Ball(Window);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
-            SetSpeed(3,3);
+            SetSpeed(3, 3);
             SetupTimer();
+            Tiles.Add(new RegularTile(Ball, "green", new Vector2(100, 80)));
+            Tiles.Add(new RegularTile(Ball, "green", new Vector2(300, 80)));
         }
         public static GameEngine GetInstance(NavigationManager navigationManager)
         {
@@ -106,7 +111,7 @@ namespace Arkanoid.Data
         }
         public int GetWindowWidth()
         {
-            Console.WriteLine(Window.GetWidth());
+            //Console.WriteLine(Window.GetWidth());
             return this.Window.GetWidth();
         }
         public int GetBallX()

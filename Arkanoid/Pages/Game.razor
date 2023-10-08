@@ -20,13 +20,20 @@
         <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
         <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
         <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
+    @if (GE is not null)
+    {
+        @foreach (var tile in GE.Tiles)
+        {
+            <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
+        }
+    }
     </div>
 
 <h4>@KeyPressed </h4>
 <br />
 
 @code {
-    private GameEngine? GE;
+    private GameEngine? GE = null;//GameEngine.GetInstance(navigation);
     private HubConnection? hubConnection;
     private Paddle P1;
     private Paddle P2;
