@@ -13,7 +13,6 @@ namespace Arkanoid.Data
     public class GameEngine : IAsyncDisposable
     {
         private static GameEngine? Instance = null;
-        private readonly NavigationManager Navigation;
         private HubConnection? hubConnection;
         private GameWindow Window = new GameWindow();
         private Ball Ball;
@@ -23,13 +22,8 @@ namespace Arkanoid.Data
         private static object ThreadLock = new object();
         public List<Tile> Tiles = new();
 
-        private GameEngine(NavigationManager navManager)
+        private GameEngine()
         {
-            Navigation = navManager;
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
-                .Build();
-            hubConnection.StartAsync();
             Ball = new Ball(Window);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
@@ -38,15 +32,25 @@ namespace Arkanoid.Data
             Tiles.Add(new RegularTile(Ball, "green", new Vector2(100, 80)));
             Tiles.Add(new RegularTile(Ball, "green", new Vector2(300, 80)));
         }
-        public static GameEngine GetInstance(NavigationManager navigationManager)
+        public static GameEngine GetInstance()
         {
             lock (ThreadLock)
             {
                 if (Instance is null)
                 {
-                    Instance = new GameEngine(navigationManager);
+                    Instance = new GameEngine();
                 }
                 return Instance;
+            }
+        }
+        public void ConnectToHub(NavigationManager navigationManager)
+        {
+            if (hubConnection is null)
+            {
+                hubConnection = new HubConnectionBuilder()
+                    .WithUrl(navigationManager.ToAbsoluteUri("/gamehub"))
+                    .Build();
+                hubConnection.StartAsync();
             }
         }
         private void SetupTimer()

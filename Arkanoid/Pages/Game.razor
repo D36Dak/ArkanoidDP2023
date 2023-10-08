@@ -43,7 +43,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        GE = GameEngine.GetInstance(Navigation);
+        GE = GameEngine.GetInstance();
+        GE.ConnectToHub(Navigation);
         P1 = GE.P1;
         P2 = GE.P2;
 
