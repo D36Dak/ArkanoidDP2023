@@ -15,7 +15,7 @@ namespace Arkanoid.Data
         private static GameEngine? Instance = null;
         private HubConnection? hubConnection;
         private GameWindow Window = new GameWindow();
-        private Ball Ball;
+        public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
         private System.Timers.Timer? timer;
@@ -29,8 +29,6 @@ namespace Arkanoid.Data
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
             SetSpeed(3, 3);
             SetupTimer();
-            Tiles.Add(new RegularTile(Ball, "green", new Vector2(100, 80)));
-            Tiles.Add(new RegularTile(Ball, "green", new Vector2(300, 80)));
         }
         public static GameEngine GetInstance()
         {

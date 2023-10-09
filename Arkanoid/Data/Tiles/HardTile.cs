@@ -2,20 +2,18 @@
 
 namespace Arkanoid.Data.Tiles
 {
-    public class RegularTile : Tile
+    public class HardTile : Tile
     {
-        public RegularTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
+        public HardTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
         {
         }
 
         public override void OnHit()
         {
-            // fix singleton for GameEngine first
+            // just bounce off
             var bounceDir = GetBounceOffDirection();
             if (bounceDir == BounceDir.Horizontal) ball.InvertX();
             else ball.InvertY();
-            // destroy this tile. cheap but effective
-            GameEngine.GetInstance().Tiles.Remove(this);
         }
     }
 }
