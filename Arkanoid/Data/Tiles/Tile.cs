@@ -59,18 +59,21 @@ namespace Arkanoid.Data.Tiles
         protected BounceDir GetBounceOffDirection()
         {
             Vector3 Line1Coeffs = GetLineCoeffs(Position, new Vector2(Position.X + Width, Position.Y + Height));
+			
             Vector3 Line2Coeffs = GetLineCoeffs(new Vector2(Position.X, Position.Y + Height), new Vector2(Position.X + Width, Position.Y));
             Vector2 Line1 = new Vector2(LineX(Line1Coeffs, ball.GetY()), LineY(Line1Coeffs, ball.GetX()));
             Vector2 Line2 = new Vector2(LineX(Line2Coeffs, ball.GetY()), LineY(Line2Coeffs, ball.GetX()));
 
             // hit is from the top or the bottom
-            if(Line1.Y > Middle.Y && Line2.Y > Middle.Y || Line1.Y < Middle.Y && Line2.Y < Middle.Y)
+            if(Line1.Y > ball.GetY() && Line2.Y > ball.GetY() || Line1.Y < ball.GetY() && Line2.Y < ball.GetY())
             {
+				
                 return BounceDir.Vertical;
             }
             // hit can only be horizontal now now
             else
             {
+			
                 return BounceDir.Horizontal;
             }
         }
@@ -92,5 +95,9 @@ namespace Arkanoid.Data.Tiles
             }else
                 isInside = false;
         }
+		
+		public void TestBounceDir(){
+			GetBounceOffDirection();
+		}
     }
 }

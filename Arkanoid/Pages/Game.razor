@@ -64,6 +64,9 @@
                 GE.Tiles.Add(tile);
             }
         }
+		Tile tl = new RegularTile(GE.Ball, "red", new Vector2(100, 300));
+		GE.Tiles.Add(tl);
+		tl.TestBounceDir();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
