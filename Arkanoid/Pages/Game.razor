@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Timers
 @using Arkanoid.Data
+@using Arkanoid.Data.PowerUps
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
@@ -18,8 +19,8 @@
          style="background-color: #000000; width: @(GE.GetWindowWidth())px; height: @(GE.GetWindowHeight())px; margin: auto; position:relative"
          tabindex="0">
         <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
-        <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
-        <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
+    <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
+    <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
     @if (GE is not null)
     {
         @foreach (var tile in GE.Tiles)
@@ -27,7 +28,14 @@
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
     }
+    @if (pu1 is not null && pu2 is not null)
+    {
+        <div style="width:@(pu1.Size)px;height:@(pu1.Size)px;border-radius:10%;background-color:@(pu1.Color); top:@(pu1.Y)px; left:@(pu1.X)px; position:absolute; display:inline-block"></div>
+        <div style="width:@(pu2.Size)px;height:@(pu2.Size)px;border-radius:10%;background-color:@(pu2.Color); top:@(pu2.Y)px; left:@(pu2.X)px; position:absolute; display:inline-block"></div>
+
+    }
     </div>
+
 
 <h4>@KeyPressed </h4>
 <br />
@@ -38,6 +46,10 @@
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
+    private PowerUpFactory negativeFactory = new NegativePowerUpFactory();
+    private PowerUpFactory positiveFactory = new PositivePowerUpFactory();
+    private PowerUp pu1;
+    private PowerUp pu2;
     bool canStart = true;
     string KeyPressed = "aaa";
 
@@ -47,6 +59,9 @@
         GE.ConnectToHub(Navigation);
         P1 = GE.P1;
         P2 = GE.P2;
+
+        pu1 = negativeFactory.CreatePowerUp(negativeFactory.PowerUpTypes[0], 50, 66);
+        pu2 = positiveFactory.CreatePowerUp(positiveFactory.PowerUpTypes[0], 100, 300);
 
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
