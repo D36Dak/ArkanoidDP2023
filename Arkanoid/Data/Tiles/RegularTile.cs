@@ -8,14 +8,14 @@ namespace Arkanoid.Data.Tiles
         {
         }
 
-        public override void OnHit()
+        public override void OnHit(Tile tile, Ball ball)
         {
             // fix singleton for GameEngine first
-            var bounceDir = GetBounceOffDirection();
-            if (bounceDir == BounceDir.Horizontal) ball.InvertX();
-            else ball.InvertY();
+            var bounceDir = Linear.GetBounceOffDirection(this, ball);
+            GameEngine.GetInstance().InvertBallDirection(bounceDir);
             // destroy this tile. cheap but effective
-            GameEngine.GetInstance().Tiles.Remove(this);
+            Console.WriteLine(bounceDir);
+            GameEngine.GetInstance().DestroyTile(this);
         }
     }
 }

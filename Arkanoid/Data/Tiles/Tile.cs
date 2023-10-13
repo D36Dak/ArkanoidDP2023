@@ -1,11 +1,12 @@
-﻿using System.Drawing;
+﻿using Arkanoid.Data.Tiles.Decorator;
+using System.Drawing;
 using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
 {
-    public abstract class Tile : IObserver
+    public abstract class Tile : Component, IObserver
     {
-        public string Color { get; private set; }
+        public string Color { get; set; }
         // top right corner
         public Vector2 Position { get; private set; }
         public Vector2 Middle { 
@@ -32,51 +33,9 @@ namespace Arkanoid.Data.Tiles
             ball.UnAttach(this);
         }
 
-        public abstract void OnHit();
-
         #region extract to some other static class
         // should be extracted into a static class
-        private static Vector3 GetLineCoeffs(Vector2 p1, Vector2 p2)
-        {
-            //Ax + Bx + C = 0
-            float a = p1.Y - p2.Y;
-            float b = p2.X - p1.X;
-            float c = p1.X * p2.Y - p2.X * p1.Y;
-            return new Vector3(a, b, c);
-        }
-
-        private static float LineY(Vector3 coeffs, float x)
-        {
-            return -(coeffs.X * x + coeffs.Z) / coeffs.Y;
-        }
-
-        private static float LineX(Vector3 coeffs, float y)
-        {
-            return -(coeffs.Y * y + coeffs.Z) / coeffs.X;
-        }
-
-        protected enum BounceDir { Vertical, Horizontal }
-        protected BounceDir GetBounceOffDirection()
-        {
-            Vector3 Line1Coeffs = GetLineCoeffs(Position, new Vector2(Position.X + Width, Position.Y + Height));
-			
-            Vector3 Line2Coeffs = GetLineCoeffs(new Vector2(Position.X, Position.Y + Height), new Vector2(Position.X + Width, Position.Y));
-            Vector2 Line1 = new Vector2(LineX(Line1Coeffs, ball.GetY()), LineY(Line1Coeffs, ball.GetX()));
-            Vector2 Line2 = new Vector2(LineX(Line2Coeffs, ball.GetY()), LineY(Line2Coeffs, ball.GetX()));
-
-            // hit is from the top or the bottom
-            if(Line1.Y > ball.GetY() && Line2.Y > ball.GetY() || Line1.Y < ball.GetY() && Line2.Y < ball.GetY())
-            {
-				
-                return BounceDir.Vertical;
-            }
-            // hit can only be horizontal now now
-            else
-            {
-			
-                return BounceDir.Horizontal;
-            }
-        }
+        
         #endregion
         private bool isInside = false;
         public void Update()
@@ -91,13 +50,9 @@ namespace Arkanoid.Data.Tiles
 
                 // bounce off
                 // or do i all of that in OnHit. That probably would be better
-                OnHit();
+                OnHit(this, ball);
             }else
                 isInside = false;
         }
-		
-		public void TestBounceDir(){
-			GetBounceOffDirection();
-		}
     }
 }

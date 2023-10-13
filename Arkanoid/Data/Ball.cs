@@ -125,7 +125,8 @@ namespace Arkanoid.Data
 
         public void NotifyAll()
         {
-            foreach(var observer in Observers)
+            // had to convert to list because getting operation not permitted..
+            foreach(var observer in Observers.ToList())
             {
                 observer.Update();
             }

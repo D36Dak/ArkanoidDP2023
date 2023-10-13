@@ -24,7 +24,7 @@
         <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
     @if (GE is not null)
     {
-        @foreach (var tile in GE.Tiles)
+        @foreach (var tile in GE.Tiles.ToList())
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
@@ -46,7 +46,6 @@
     protected override async Task OnInitializedAsync()
     {
         GE = GameEngine.GetInstance();
-        GE.ConnectToHub(Navigation);
         P1 = GE.P1;
         P2 = GE.P2;
         TileFactory tf = new();
@@ -64,13 +63,10 @@
                 GE.Tiles.Add(tile);
             }
         }
-		Tile tl = new RegularTile(GE.Ball, "red", new Vector2(100, 300));
-		GE.Tiles.Add(tl);
-		tl.TestBounceDir();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
-
+        GE.ConnectToHub(hubConnection);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
             if (tag == "ball")
@@ -95,20 +91,26 @@
         hubConnection.On<string, Side>("PlayerJoin", (id, side) =>
         {
             Console.WriteLine($"Joined {id} {hubConnection.ConnectionId} {side}");
-            Paddle p;
-            if(side == Side.RIGHT)
-            {
-                p = P2;
-            } else
-            {
-                p = P1;
-            }
-            p.id = id;
+            
 
             // change player color to indicate that joined. later...
             if (id.Equals(hubConnection.ConnectionId))
             {
+                Paddle p;
+                if (side == Side.RIGHT)
+                {
+                    p = P2;
+                }
+                else
+                {
+                    p = P1;
+                }
+                Console.WriteLine("Set player id to " + id);
+                // my player should only be on singleton probably
+                p.id = id;
                 myPlayer = p;
+                if(GE.Player == null)
+                    GE.Player = p;
                 myPlayer.color = "olive";
                 Console.WriteLine($"PaddleID {myPlayer.side}");
                 InvokeAsync(StateHasChanged);
@@ -126,6 +128,8 @@
             {
                 p = P1;
             }
+            // somehow handle GE player this is messy GE is server this is client what is happening?
+            if (GE.Player != null && GE.Player.id == id) GE.Player = null;
             // change color to indicate that player left
 
         });
@@ -162,7 +166,7 @@
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("Subscribe", hubConnection.ConnectionId);
+            await hubConnection.SendAsync("Subscribe");
         }
     }
 

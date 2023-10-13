@@ -21,6 +21,7 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private static object ThreadLock = new object();
         public List<Tile> Tiles = new();
+        public Paddle? Player { get; set; } = null;
 
         private GameEngine()
         {
@@ -34,21 +35,50 @@ namespace Arkanoid.Data
         {
             lock (ThreadLock)
             {
-                if (Instance is null)
-                {
-                    Instance = new GameEngine();
-                }
+                Instance ??= new GameEngine();
                 return Instance;
             }
         }
-        public void ConnectToHub(NavigationManager navigationManager)
+
+        public async Task DestroyTile(Tile tile)
         {
-            if (hubConnection is null)
+            if(hubConnection != null && Player != null)
+                await hubConnection.SendAsync("RemoveTile", tile.Position.X, tile.Position.Y, Player.id);
+        }
+
+        public async Task InvertBallDirection(BounceDir dir)
+        {
+            if (hubConnection != null && Player != null)
             {
-                hubConnection = new HubConnectionBuilder()
-                    .WithUrl(navigationManager.ToAbsoluteUri("/gamehub"))
-                    .Build();
-                hubConnection.StartAsync();
+                await hubConnection.SendAsync("InvertBall", dir, Player.id);
+            }
+        }
+
+        public void ConnectToHub(HubConnection hubConnection)
+        {
+            if (this.hubConnection is null)
+            {
+                this.hubConnection = hubConnection;
+
+                hubConnection.On<float, float>("ReceiveRemoveTile", (x, y) =>
+                {
+                    // Maybe have an identifier for each tile? Probably would have syncing problems.
+                    var tileToRemove = Tiles.Find(w => w.Position.X == x && w.Position.Y == y);
+                    if (tileToRemove != null)
+                    {
+                        // unatach from ball so that tile stops calculating collisions.
+                        Ball.UnAttach(tileToRemove);
+                        // remove from rendering list
+                        Tiles.Remove(tileToRemove);
+                    }
+                });
+
+                hubConnection.On<BounceDir>("ReceiveInvertBall", (dir) =>
+                {
+                    if (dir == BounceDir.Vertical)
+                        Ball.InvertY();
+                    else Ball.InvertX();
+                });
             }
         }
         private void SetupTimer()

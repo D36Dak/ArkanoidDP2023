@@ -8,10 +8,10 @@ namespace Arkanoid.Data.Tiles
         {
         }
 
-        public override void OnHit()
+        public override void OnHit(Tile tile, Ball ball)
         {
             // just bounce off
-            var bounceDir = GetBounceOffDirection();
+            var bounceDir = Linear.GetBounceOffDirection(this, ball);
             if (bounceDir == BounceDir.Horizontal) ball.InvertX();
             else ball.InvertY();
         }
