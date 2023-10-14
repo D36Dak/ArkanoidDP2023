@@ -14,15 +14,12 @@ namespace Arkanoid.Data
     {
         private static GameEngine? Instance = null;
         private HubConnection? hubConnection;
-        private GameWindow Window = new GameWindow();
+        private GameWindow Window = new();
         public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
         private System.Timers.Timer? timer;
-        private static object ThreadLock = new object();
-        public List<Tile> Tiles = new();
-        public Paddle? Player { get; set; } = null;
-
+        private static object ThreadLock = new();
         private GameEngine()
         {
             Ball = new Ball(Window);
@@ -40,17 +37,11 @@ namespace Arkanoid.Data
             }
         }
 
-        public async Task DestroyTile(Tile tile)
+        public async Task InvertBallDirection(BounceDir dir, string pid)
         {
-            if(hubConnection != null && Player != null)
-                await hubConnection.SendAsync("RemoveTile", tile.Position.X, tile.Position.Y, Player.id);
-        }
-
-        public async Task InvertBallDirection(BounceDir dir)
-        {
-            if (hubConnection != null && Player != null)
+            if (hubConnection != null)
             {
-                await hubConnection.SendAsync("InvertBall", dir, Player.id);
+                await hubConnection.SendAsync("InvertBall", dir, pid);
             }
         }
 
@@ -60,19 +51,6 @@ namespace Arkanoid.Data
             {
                 this.hubConnection = hubConnection;
 
-                hubConnection.On<float, float>("ReceiveRemoveTile", (x, y) =>
-                {
-                    // Maybe have an identifier for each tile? Probably would have syncing problems.
-                    var tileToRemove = Tiles.Find(w => w.Position.X == x && w.Position.Y == y);
-                    if (tileToRemove != null)
-                    {
-                        // unatach from ball so that tile stops calculating collisions.
-                        Ball.UnAttach(tileToRemove);
-                        // remove from rendering list
-                        Tiles.Remove(tileToRemove);
-                    }
-                });
-
                 hubConnection.On<BounceDir>("ReceiveInvertBall", (dir) =>
                 {
                     if (dir == BounceDir.Vertical)
@@ -81,6 +59,12 @@ namespace Arkanoid.Data
                 });
             }
         }
+
+        public void RemoveTileFromCollisions(Tile tile)
+        {
+            Ball.UnAttach(tile);
+        }
+
         private void SetupTimer()
         {
             timer = new System.Timers.Timer();

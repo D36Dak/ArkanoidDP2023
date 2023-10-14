@@ -7,6 +7,8 @@ namespace Arkanoid.Data.Tiles
     public abstract class Tile : Component, IObserver
     {
         public string Color { get; set; }
+        public TileManager TileManager { get; private set; }
+        public Decorator.Decorator? Decorator { get; set; }
         // top right corner
         public Vector2 Position { get; private set; }
         public Vector2 Middle { 
@@ -18,7 +20,7 @@ namespace Arkanoid.Data.Tiles
         public int Width { get; private set; }
         public int Height { get; private set; }
         protected Ball ball { get; private set; }
-        public Tile(Ball ball, string color, Vector2 position, int width = 100, int height = 50)
+        public Tile(Ball ball, string color, Vector2 position, TileManager tileManager, Decorator.Decorator? decorator = null, int width = 100, int height = 50)
         {
             Color = color;
             Position = position;
@@ -26,6 +28,8 @@ namespace Arkanoid.Data.Tiles
             ball.Attach(this);
             Width = width;
             Height = height;
+            TileManager = tileManager;
+            Decorator = decorator;
         }
 
         ~Tile()
@@ -50,8 +54,10 @@ namespace Arkanoid.Data.Tiles
 
                 // bounce off
                 // or do i all of that in OnHit. That probably would be better
-                OnHit(this, ball);
-            }else
+                if(Decorator == null) OnHit(this, ball);
+                else Decorator.OnHit(this, ball);
+            }
+            else
                 isInside = false;
         }
     }

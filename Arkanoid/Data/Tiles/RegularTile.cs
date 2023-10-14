@@ -4,7 +4,7 @@ namespace Arkanoid.Data.Tiles
 {
     public class RegularTile : Tile
     {
-        public RegularTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
+        public RegularTile(Ball ball, string color, Vector2 position, TileManager tm) : base(ball, color, position, tm)
         {
         }
 
@@ -12,10 +12,10 @@ namespace Arkanoid.Data.Tiles
         {
             // fix singleton for GameEngine first
             var bounceDir = Linear.GetBounceOffDirection(this, ball);
-            GameEngine.GetInstance().InvertBallDirection(bounceDir);
+            GameEngine.GetInstance().InvertBallDirection(bounceDir, TileManager.Connection.ConnectionId);
             // destroy this tile. cheap but effective
-            Console.WriteLine(bounceDir);
-            GameEngine.GetInstance().DestroyTile(this);
+            //Console.WriteLine(bounceDir);
+            //TileManager.DestroyTile(this);
         }
     }
 }

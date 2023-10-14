@@ -22,16 +22,14 @@
         <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
         <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
         <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
-    @if (GE is not null)
+    @if (tm is not null)
     {
-        @foreach (var tile in GE.Tiles.ToList())
+        @foreach (var tile in tm.tiles.ToList())
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
     }
     </div>
-
-<h4>@KeyPressed </h4>
 <br />
 
 @code {
@@ -40,8 +38,8 @@
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
+    private TileManager? tm;
     bool canStart = true;
-    string KeyPressed = "aaa";
 
     protected override async Task OnInitializedAsync()
     {
@@ -54,18 +52,19 @@
         Vector2 gap = new Vector2(20, 20);
         int width = 100;
         int height = 50;
-        for(var i = 0; i < 3; i++)
-        {
-            for(var j = 0; j < 10; j++)
-            {
-                var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                Tile tile = tf.CreateTile(TileType.Regular, pos);
-                GE.Tiles.Add(tile);
-            }
-        }
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
+        tm = new TileManager(hubConnection);
+        for (var i = 0; i < 3; i++)
+        {
+            for (var j = 0; j < 10; j++)
+            {
+                var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                Tile tile = tf.CreateTile(TileType.Regular, pos, tm);
+                tm.tiles.Add(tile);
+            }
+        }
         GE.ConnectToHub(hubConnection);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
@@ -90,8 +89,8 @@
 
         hubConnection.On<string, Side>("PlayerJoin", (id, side) =>
         {
-            Console.WriteLine($"Joined {id} {hubConnection.ConnectionId} {side}");
-            
+            Console.WriteLine($"Joined {id} {side}");
+
 
             // change player color to indicate that joined. later...
             if (id.Equals(hubConnection.ConnectionId))
@@ -109,8 +108,6 @@
                 // my player should only be on singleton probably
                 p.id = id;
                 myPlayer = p;
-                if(GE.Player == null)
-                    GE.Player = p;
                 myPlayer.color = "olive";
                 Console.WriteLine($"PaddleID {myPlayer.side}");
                 InvokeAsync(StateHasChanged);
@@ -128,14 +125,13 @@
             {
                 p = P1;
             }
-            // somehow handle GE player this is messy GE is server this is client what is happening?
-            if (GE.Player != null && GE.Player.id == id) GE.Player = null;
             // change color to indicate that player left
 
         });
 
         await hubConnection.StartAsync();
     }
+
     private async Task KeyPressEvent(KeyboardEventArgs args)
     {
         if (myPlayer == null) return;
@@ -166,7 +162,9 @@
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("Subscribe");
+            string? id = hubConnection.ConnectionId;
+            if(id != null)
+                await hubConnection.SendAsync("Subscribe", id);
         }
     }
 

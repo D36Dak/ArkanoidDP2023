@@ -4,7 +4,7 @@ namespace Arkanoid.Data.Tiles
 {
     public class HardTile : Tile
     {
-        public HardTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
+        public HardTile(Ball ball, string color, Vector2 position, TileManager tm) : base(ball, color, position, tm)
         {
         }
 

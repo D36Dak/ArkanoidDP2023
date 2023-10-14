@@ -13,6 +13,12 @@ namespace Arkanoid.Hubs
             await Clients.All.SendAsync("ReceivePosition", x, y, tag);
         }
 
+        public async Task TileColor(float x, float y, string col, string id)
+        {
+            if (players[0].id != id) return;
+            await Clients.All.SendAsync("ReceiveTileColor", x, y, col);
+        }
+
         public async Task RemoveTile(float x, float y, string id)
         {
             if (players[0].id != id) return;
@@ -29,9 +35,8 @@ namespace Arkanoid.Hubs
         {
             await Clients.All.SendAsync("ReceivePlayerPosition", x, side);
         }
-        public async Task Subscribe()
+        public async Task Subscribe(string id)
         {
-            string id = Context.ConnectionId;
             if (players.Count >= 2)
             {
                 return;
