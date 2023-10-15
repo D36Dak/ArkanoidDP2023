@@ -19,7 +19,7 @@
                 default:
                     break;
             }
-            return null;
+            throw new ArgumentException(string.Format("{0} is not a valid powerup type",type));
         }
     }
 }
