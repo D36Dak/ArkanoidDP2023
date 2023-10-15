@@ -14,14 +14,12 @@ namespace Arkanoid.Data
     {
         private static GameEngine? Instance = null;
         private HubConnection? hubConnection;
-        private GameWindow Window = new GameWindow();
-        private Ball Ball;
+        private GameWindow Window = new();
+        public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
         private System.Timers.Timer? timer;
-        private static object ThreadLock = new object();
-        public List<Tile> Tiles = new();
-
+        private static object ThreadLock = new();
         private GameEngine()
         {
             Ball = new Ball(Window);
@@ -29,30 +27,44 @@ namespace Arkanoid.Data
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
             SetSpeed(3, 3);
             SetupTimer();
-            Tiles.Add(new RegularTile(Ball, "green", new Vector2(100, 80)));
-            Tiles.Add(new RegularTile(Ball, "green", new Vector2(300, 80)));
         }
         public static GameEngine GetInstance()
         {
             lock (ThreadLock)
             {
-                if (Instance is null)
-                {
-                    Instance = new GameEngine();
-                }
+                Instance ??= new GameEngine();
                 return Instance;
             }
         }
-        public void ConnectToHub(NavigationManager navigationManager)
+
+        public async Task InvertBallDirection(BounceDir dir, string pid)
         {
-            if (hubConnection is null)
+            if (hubConnection != null)
             {
-                hubConnection = new HubConnectionBuilder()
-                    .WithUrl(navigationManager.ToAbsoluteUri("/gamehub"))
-                    .Build();
-                hubConnection.StartAsync();
+                await hubConnection.SendAsync("InvertBall", dir, pid);
             }
         }
+
+        public void ConnectToHub(HubConnection hubConnection)
+        {
+            if (this.hubConnection is null)
+            {
+                this.hubConnection = hubConnection;
+
+                hubConnection.On<BounceDir>("ReceiveInvertBall", (dir) =>
+                {
+                    if (dir == BounceDir.Vertical)
+                        Ball.InvertY();
+                    else Ball.InvertX();
+                });
+            }
+        }
+
+        public void RemoveTileFromCollisions(Tile tile)
+        {
+            Ball.UnAttach(tile);
+        }
+
         private void SetupTimer()
         {
             timer = new System.Timers.Timer();

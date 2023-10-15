@@ -12,6 +12,7 @@ namespace Arkanoid.Data
         public int SpeedY { get; private set; }
         private int BallSize = 20;
         private GameWindow GameWindow;
+        public string? Pid { get; set; } = null;
 
         public List<IObserver> Observers = new();
 
@@ -125,7 +126,8 @@ namespace Arkanoid.Data
 
         public void NotifyAll()
         {
-            foreach(var observer in Observers)
+            // had to convert to list because getting operation not permitted..
+            foreach(var observer in Observers.ToList())
             {
                 observer.Update();
             }
