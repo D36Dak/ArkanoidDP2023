@@ -10,7 +10,8 @@ namespace Arkanoid.Data.Tiles.Decorator
         public override void OnHit(Tile tile, Ball ball)
         {
             base.OnHit(tile, ball);
-            tile.TileManager.Connection.SendAsync("TileColor", tile.Position.X, tile.Position.Y, colors[random.Next(0, colors.Length)], tile.TileManager.Connection.ConnectionId);
+            tile.Color = colors[random.Next(colors.Length)];
+            //tile.TileManager.Connection.SendAsync("TileColor", tile.Position.X, tile.Position.Y, colors[random.Next(0, colors.Length)], tile.TileManager.Connection.ConnectionId);
 
         }
     }
