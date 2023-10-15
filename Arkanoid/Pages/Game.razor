@@ -3,7 +3,6 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Timers
 @using Arkanoid.Data
-@using Arkanoid.Data.PowerUps
 @using System.Numerics;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
@@ -11,26 +10,26 @@
 <PageTitle>Game</PageTitle>
 
 <h1>Game view</h1>
-    <button class="btn btn-primary" disabled="@(!canStart)" @onclick="GE.StartTimer">Start</button>
-    <button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
-    <button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
-    <button class="btn btn-primary" @onclick="Subscribe">Join game</button>
+<button class="btn btn-primary" disabled="@(!canStart)" @onclick="GE.StartTimer">Start</button>
+<button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
+<button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
+<button class="btn btn-primary" @onclick="Subscribe">Join game</button>
 
-    @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
-    <div id="level" @onkeypress="KeyPressEvent"
-         style="background-color: #000000; width: @(GE.GetWindowWidth())px; height: @(GE.GetWindowHeight())px; margin: auto; position:relative"
-         tabindex="0">
-        <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
-        <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
-        <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
-    @if (tm is not null)
+@* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
+<div id="level" @onkeypress="KeyPressEvent"
+     style="background-color: #000000; width: @(GE.GetWindowWidth())px; height: @(GE.GetWindowHeight())px; margin: auto; position:relative"
+     tabindex="0">
+    <div style="color: white; top: @(GE.GetBallY())px; left: @(GE.GetBallX())px; width: 1px; position: relative"><img width="@GE.GetBallSize()" height="@GE.GetBallSize()" src="https://static.vecteezy.com/system/resources/previews/016/314/339/original/red-circle-red-dot-icon-free-png.png" /></div>
+    <div style="width:@(P1.GetWidth())px;height:20px;border:1px solid red;background-color:@P1.color; top:@(GE.GetWindowHeight()-60)px; left:@(P1.GetX())px; position:absolute; display:inline-block"></div>
+    <div style="width:@(P2.GetWidth())px;height:20px;border:1px solid red;background-color:@P2.color; top:@(GE.GetWindowHeight()-60)px; left:@(P2.GetX())px; position:absolute; display:inline-block"></div>
+    @if (GE.tm is not null)
     {
-        @foreach (var tile in tm.tiles.ToList())
+        @foreach (var tile in GE.tm.tiles.ToList())
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
     }
-    </div>
+</div>
 <br />
 
 @code {
@@ -56,22 +55,27 @@
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
-        tm = new TileManager(hubConnection);
-        for (var i = 0; i < 3; i++)
+        if (GE.tm is null)
         {
-            for (var j = 0; j < 10; j++)
+            tm = new TileManager(hubConnection);
+            for (var i = 0; i < 3; i++)
             {
-                var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                Tile tile = tf.CreateTile(TileType.Regular, pos, tm);
-                tm.tiles.Add(tile);
+                for (var j = 0; j < 10; j++)
+                {
+                    var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    Tile tile = tf.CreateTile(TileType.Regular, pos, tm);
+                    tm.tiles.Add(tile);
+                }
             }
+            GE.tm = tm;
         }
+        
         GE.ConnectToHub(hubConnection);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
             if (tag == "ball")
             {
-                GE.SetBallPosition(x, y);
+                //GE.SetBallPosition(x, y);
                 InvokeAsync(StateHasChanged);
             }
         });
@@ -136,7 +140,8 @@
     private async Task KeyPressEvent(KeyboardEventArgs args)
     {
         if (myPlayer == null) return;
-        switch(args.Key){
+        switch (args.Key)
+        {
             case "a":
                 myPlayer.MoveRight();
                 await SendPaddlePosition(myPlayer);
@@ -154,7 +159,7 @@
 
     private async Task SendPaddlePosition(Paddle p)
     {
-        if(hubConnection is not null)
+        if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SetPlayerPosition", p.GetX(), p.side);
         }
@@ -164,7 +169,7 @@
         if (hubConnection is not null)
         {
             string? id = hubConnection.ConnectionId;
-            if(id != null)
+            if (id != null)
                 await hubConnection.SendAsync("Subscribe", id);
         }
     }

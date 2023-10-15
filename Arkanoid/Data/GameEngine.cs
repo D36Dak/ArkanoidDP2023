@@ -18,6 +18,7 @@ namespace Arkanoid.Data
         public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
+        public TileManager? tm;
         private System.Timers.Timer? timer;
         private static object ThreadLock = new();
         private GameEngine()
@@ -39,10 +40,13 @@ namespace Arkanoid.Data
 
         public async Task InvertBallDirection(BounceDir dir, string pid)
         {
-            if (hubConnection != null)
-            {
-                await hubConnection.SendAsync("InvertBall", dir, pid);
-            }
+            if (dir == BounceDir.Vertical)
+                Ball.InvertY();
+            else Ball.InvertX();
+            //if (hubConnection != null)
+            //{
+            //    await hubConnection.SendAsync("InvertBall", dir, pid);
+            //}
         }
 
         public void ConnectToHub(HubConnection hubConnection)
