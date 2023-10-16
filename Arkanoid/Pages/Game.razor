@@ -4,6 +4,7 @@
 @using System.Timers
 @using Arkanoid.Data
 @using System.Numerics;
+@using Arkanoid.Data.Strategy;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
@@ -14,6 +15,11 @@
 <button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
 <button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
 <button class="btn btn-primary" @onclick="Subscribe">Join game</button>
+<div>
+    <button class="btn btn-secondary" @onclick="RegularBall">Regular Ball</button>
+    <button class="btn btn-secondary" @onclick="FastBall">Fast Ball</button>
+    <button class="btn btn-secondary" @onclick="TeleportingBall">Teleporting Ball</button>
+</div>
 
 @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
 <div id="level" @onkeypress="KeyPressEvent"
@@ -69,7 +75,7 @@
             }
             GE.tm = tm;
         }
-        
+
         GE.ConnectToHub(hubConnection);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
@@ -182,6 +188,27 @@
         if (hubConnection is not null)
         {
             await hubConnection.DisposeAsync();
+        }
+    }
+    private void RegularBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new RegularBallStrategy());
+        }
+    }
+    private void FastBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new FastBallStrategy());
+        }
+    }
+    private void TeleportingBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new TeleportSideStrategy());
         }
     }
     //----------------------------------------

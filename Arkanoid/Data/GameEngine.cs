@@ -2,6 +2,7 @@
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
@@ -145,6 +146,10 @@ namespace Arkanoid.Data
         public int GetBallSize()
         {
             return Ball.GetSize();
+        }
+        public void SetBallMovementStrategy(BallMoveAlgorithm strategy)
+        {
+            this.Ball.MoveAlgorithm = strategy;
         }
     }
 }
