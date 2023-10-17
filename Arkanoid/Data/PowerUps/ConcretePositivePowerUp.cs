@@ -2,9 +2,9 @@
 {
     namespace Arkanoid.Data.PowerUps
     {
-        public class ConcretePositivePowerUp : PositivePowerUp
+        public class ConcretePositivePowerUp : PowerUp
         {
-            public ConcretePositivePowerUp(int x, int y) : base(x, y)
+            public ConcretePositivePowerUp(int x, int y, string color, int size) : base(x, y, color, size)
             {
             }
         }

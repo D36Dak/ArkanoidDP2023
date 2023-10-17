@@ -6,30 +6,36 @@ namespace Arkanoid.Data.PowerUps
     {
         public int X { get; protected set; }
         public int Y { get; protected set; }
-        public string? Color { get; protected set; }
+        public string Color { get; protected set; }
         public int Size { get; protected set; }
-        public PowerUpDirector director;
-        public IPowerUpBuilder positiveBuilder;
-        public IPowerUpBuilder negativeBuilder;
-        public PowerUp positivePowerUp;
-        public PowerUp negativePowerUp;
 
-        public PowerUp(int X, int Y, string color, int size)
+        public PowerUp(int x, int y, string color, int size)
         {
-            this.X = X;
-            this.Y = Y;
-            this.Color = color;
+            X = x;
+            Y = y;
+            Color = color;
             Size = size;
+        }
 
-            director = new PowerUpDirector();
-            positiveBuilder = new PositivePowerUpBuilder();
-            negativeBuilder = new NegativePowerUpBuilder();
+        public void SetX(int value)
+        {
+            X = value;
+        }
 
-            positivePowerUp = director.Construct(positiveBuilder, 10, 20, "green", 30);
+        public void SetY(int value)
+        {
+            Y = value;
+        }
 
-            
-            negativePowerUp = director.Construct(negativeBuilder, 40, 50, "red", 25);
+        public void SetColor(string value)
+        {
+            Color = value;
+        }
+        public void SetSize(int value)
+        {
+            Size = value;
         }
     }
+
 
 }

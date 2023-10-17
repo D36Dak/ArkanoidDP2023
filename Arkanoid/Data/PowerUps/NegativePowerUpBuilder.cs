@@ -4,28 +4,28 @@ namespace Arkanoid.Data.PowerUps
 {
     public class NegativePowerUpBuilder : IPowerUpBuilder
     {
-        private int x, y, size;
-        private string color;
+        private PowerUp powerUp = new ConcreteNegativePowerUp(0, 0, "red", 0);
 
         public void SetPosition(int x, int y)
         {
-            this.x = x;
-            this.y = y;
+            powerUp.SetX(x);
+            powerUp.SetY(y);
         }
 
         public void SetColor(string color)
         {
-            this.color = color;
+            powerUp.SetColor(color);
         }
 
         public void SetSize(int size)
         {
-            this.size = size;
+            powerUp.SetSize(size);
         }
 
         public PowerUp Build()
         {
-            return new ConcreteNegativePowerUp(x, y);
+            return powerUp;
         }
     }
+
 }
