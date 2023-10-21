@@ -1,14 +1,15 @@
-﻿using System.Numerics;
+﻿using Arkanoid.Data.Tiles.Decorator;
+using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
 {
     public class HardTile : Tile
     {
-        public HardTile(Ball ball, string color, Vector2 position, TileManager tm) : base(ball, color, position, tm)
+        public HardTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
         {
         }
 
-        public override void OnHit(Tile tile, Ball ball)
+        public override void OnHit(Component tile, Ball ball)
         {
             // just bounce off
             var bounceDir = Linear.GetBounceOffDirection(this, ball);

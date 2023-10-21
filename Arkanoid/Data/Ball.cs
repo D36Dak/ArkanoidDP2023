@@ -125,6 +125,7 @@ namespace Arkanoid.Data
 
         public void Attach(IObserver observer)
         {
+            if (Observers.Contains(observer)) return;
             Observers.Add(observer);
         }
 
@@ -132,7 +133,6 @@ namespace Arkanoid.Data
         {
             Observers.Remove(observer);
         }
-
         public void NotifyAll()
         {
             // had to convert to list because getting operation not permitted..

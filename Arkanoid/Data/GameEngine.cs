@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
+using Arkanoid.Data.Tiles.Decorator;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -39,15 +40,11 @@ namespace Arkanoid.Data
             }
         }
 
-        public async Task InvertBallDirection(BounceDir dir, string pid)
+        public async Task InvertBallDirection(BounceDir dir)
         {
             if (dir == BounceDir.Vertical)
                 Ball.InvertY();
             else Ball.InvertX();
-            //if (hubConnection != null)
-            //{
-            //    await hubConnection.SendAsync("InvertBall", dir, pid);
-            //}
         }
 
         public void ConnectToHub(HubConnection hubConnection)
@@ -65,7 +62,7 @@ namespace Arkanoid.Data
             }
         }
 
-        public void RemoveTileFromCollisions(Tile tile)
+        public void RemoveTileFromCollisions(Component tile)
         {
             Ball.UnAttach(tile);
         }

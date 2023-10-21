@@ -7,18 +7,16 @@ namespace Arkanoid.Data.Tiles
     public class TileFactory
     {
         private Random random = new();
-        public Tile CreateTile(TileType tileType, Vector2 pos, TileManager tm)
+        public Component CreateTile(TileType tileType, Vector2 pos)
         {
             switch (tileType)
             {
                 case TileType.Regular:
-                    var tile = new RegularTile(GameEngine.GetInstance().Ball, "green", pos, tm);
-                    var dec = new ChangeColor();
-                    dec.SetComponent(tile);
-                    tile.Decorator = dec;
-                    return tile;
+                    var tile = new RegularTile(GameEngine.GetInstance().Ball, "green", pos, random.Next(1, 4));
+                    var dec = new ChangeColor(tile);
+                    return dec;
                 case TileType.Hard:
-                    return new HardTile(GameEngine.GetInstance().Ball, "gray", pos, tm);
+                    return new HardTile(GameEngine.GetInstance().Ball, "gray", pos);
                 case TileType.Explosive:
                     break;
                 default:

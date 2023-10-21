@@ -1,5 +1,6 @@
 ﻿@page "/game"
 @using Arkanoid.Data.Tiles;
+@using Arkanoid.Data.Tiles.Decorator;
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Timers
 @using Arkanoid.Data
@@ -36,6 +37,7 @@
         }
     }
 </div>
+<button @onclick="TEST">TEST</button>
 <br />
 
 @code {
@@ -44,8 +46,13 @@
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
-    private TileManager? tm;
     bool canStart = true;
+
+    public void TEST()
+    {
+        GE.tm.DestroyTile(GE.tm.tiles[0]);
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,13 +70,13 @@
         .Build();
         if (GE.tm is null)
         {
-            tm = new TileManager(hubConnection);
+            TileManager tm = new TileManager(hubConnection);
             for (var i = 0; i < 3; i++)
             {
                 for (var j = 0; j < 10; j++)
                 {
                     var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    Tile tile = tf.CreateTile(TileType.Regular, pos, tm);
+                    Component tile = tf.CreateTile(TileType.Regular, pos);
                     tm.tiles.Add(tile);
                 }
             }

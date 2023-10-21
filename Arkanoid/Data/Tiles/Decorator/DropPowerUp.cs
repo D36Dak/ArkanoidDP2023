@@ -1,10 +1,15 @@
-﻿namespace Arkanoid.Data.Tiles.Decorator
+﻿using System.Numerics;
+
+namespace Arkanoid.Data.Tiles.Decorator
 {
-    public class DropPowerUp :Decorator
+    public class DropPowerUp : Decorator
     {
-        public override void OnHit(Tile tile, Ball ball)
+        public DropPowerUp(Component component) : base(component)
         {
-            base.OnHit(tile, ball);
+        }
+
+        public override void OnHit(Component tile, Ball ball)
+        {
             // instantiate power up and add it to dropping list or something...
         }
     }
