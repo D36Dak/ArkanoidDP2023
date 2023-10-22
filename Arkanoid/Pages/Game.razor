@@ -21,6 +21,10 @@
     <button class="btn btn-secondary" @onclick="FastBall">Fast Ball</button>
     <button class="btn btn-secondary" @onclick="TeleportingBall">Teleporting Ball</button>
 </div>
+<h1 class="text-primary">Level select</h1>
+<div>
+    <button class="btn btn-primary" @onclick="LoadLevel">LEVEL 1</button>
+</div>
 
 @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
 <div id="level" @onkeypress="KeyPressEvent"
@@ -70,7 +74,7 @@
         .Build();
         if (GE.tm is null)
         {
-            TileManager tm = new TileManager(hubConnection);
+            TileManager tm = new TileManager();
             for (var i = 0; i < 3; i++)
             {
                 for (var j = 0; j < 10; j++)
@@ -217,6 +221,10 @@
         {
             GE.SetBallMovementStrategy(new TeleportSideStrategy());
         }
+    }
+    private void LoadLevel()
+    {
+        GE.LoadLevel(1);
     }
     //----------------------------------------
 }

@@ -22,6 +22,7 @@ namespace Arkanoid.Data
         public Paddle P2;
         public TileManager? tm;
         private System.Timers.Timer? timer;
+        private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
         private GameEngine()
         {
@@ -110,7 +111,36 @@ namespace Arkanoid.Data
         {
             Ball.SetPosition(0, 0);
             // top = 0; left = 0;
-            Send();
+            _ = Send();
+        }
+        public void LoadLevel(int nr)
+        {
+            _ = StopTimer();
+            tm ??= new TileManager();
+            while (tm.tiles.Count>0)
+            {
+                _ = tm.DestroyTile(tm.tiles[0]);
+            }
+            switch (nr)
+            {
+                case 1:
+                    Vector2 offset = new Vector2(40, 20);
+                    Vector2 gap = new Vector2(20, 20);
+                    int width = 100;
+                    int height = 50;
+                    for (var i = 0; i < 3; i++)
+                    {
+                        for (var j = 0; j < 10; j++)
+                        {
+                            var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            Component tile = tf.CreateTile(TileType.Regular, pos);
+                            tm.tiles.Add(tile);
+                        }
+                    }
+                    Ball.SetPosition(0, 0);
+                    break;
+                default: break;
+            }
         }
         public async Task SetBallPosition(int x, int y)
         {
