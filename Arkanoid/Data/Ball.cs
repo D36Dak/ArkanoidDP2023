@@ -1,11 +1,12 @@
-﻿using Arkanoid.Data.Strategy;
+﻿using Arkanoid.Data.Adapter;
+using Arkanoid.Data.Strategy;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Xml;
 
 namespace Arkanoid.Data
 {
-    public class Ball : ISubject
+    public class Ball : ISubject, IMovable
     {
         private int X;
         private int Y;
@@ -64,10 +65,18 @@ namespace Arkanoid.Data
         {
             return this.Y + this.SpeedY;
         }
+
+        public void Move()
+        {
+            MoveAlgorithm.Move(this);
+        }
+
         //todo - fix avoiding walls at distance,calculate distance to wall and subtract from final position
         public void Update()
         {
-            MoveAlgorithm.Move(this);
+            Move();
+            //MoveAlgorithm.Move(this);
+            
             //Console.WriteLine("Current speed is {0} : {1}", SpeedX, SpeedY);
             //int x1 = GetNextX();
             //int y1 = GetNextY();
