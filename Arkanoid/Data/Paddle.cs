@@ -62,9 +62,24 @@
             if (Ball != null)
             {
                 if(Ball.GetY()+Ball.GetSize() > Y && Ball.SpeedY > 0 && Ball.GetMiddleX() < X + Width && Ball.GetMiddleX() > X)
-                {                    
-                    Ball.InvertY();
+                {
+                    //Ball.InvertY();
+                    BounceBall();
                 }
+            }
+        }
+        private void BounceBall()
+        {
+            int hitOffset = Ball.GetMiddleX() - X;
+            int step = Width / 5;
+            int stepCount = hitOffset / step;
+            switch (stepCount)
+            {
+                case 0: Ball.SetSpeed(-3, -3); break;
+                case 1: Ball.SetSpeed(-2,-4); break;
+                case 2: Ball.SetSpeed(2, -4); break;
+                case 3: Ball.SetSpeed(3, -3); break;
+                    default: break;
             }
         }
     }

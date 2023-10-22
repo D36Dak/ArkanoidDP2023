@@ -139,6 +139,7 @@ namespace Arkanoid.Data
                         }
                     }
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
+                    SetBallMovementStrategy(new RegularBallStrategy());
                     break;
                 default: break;
             }
