@@ -40,6 +40,10 @@
         {
             return X;
         }
+        public int GetY()
+        {
+            return Y;
+        }
         public void SetX(int x)
         {
             X = x;

@@ -167,6 +167,12 @@
                 myPlayer.MoveLeft();
                 await SendPaddlePosition(myPlayer);
                 break;
+            case "w":
+                if (GE is not null)
+                {
+                    await GE.StartTimer();
+                }
+                break;
             default:
                 Console.WriteLine("Wrong key try a or d");
                 break;

@@ -29,6 +29,7 @@ namespace Arkanoid.Data
             Ball = new Ball(Window);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
         }
@@ -109,7 +110,7 @@ namespace Arkanoid.Data
         }
         public async Task ResetBallPosition()
         {
-            Ball.SetPosition(0, 0);
+            Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
             // top = 0; left = 0;
             _ = Send();
         }
@@ -137,10 +138,11 @@ namespace Arkanoid.Data
                             tm.tiles.Add(tile);
                         }
                     }
-                    Ball.SetPosition(0, 0);
+                    Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     break;
                 default: break;
             }
+            _ = Send();
         }
         public async Task SetBallPosition(int x, int y)
         {
