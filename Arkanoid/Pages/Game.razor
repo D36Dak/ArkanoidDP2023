@@ -81,7 +81,9 @@
                 {
                     var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                     Component tile = tf.CreateTile(TileType.Regular, pos);
+                    Component clonedTile = tf.Clone(tile);
                     tm.tiles.Add(tile);
+                    tm.tiles.Add(clonedTile);
                 }
             }
             GE.tm = tm;

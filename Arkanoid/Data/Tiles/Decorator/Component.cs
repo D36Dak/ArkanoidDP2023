@@ -2,7 +2,7 @@
 
 namespace Arkanoid.Data.Tiles.Decorator
 {
-    public abstract class Component : IObserver
+    public abstract class Component : IObserver, IPrototype<Component>
     {
         private bool isInside = false;
         public string Color { get; set; }
@@ -39,6 +39,26 @@ namespace Arkanoid.Data.Tiles.Decorator
         }
 
         public abstract void OnHit(Component tile, Ball ball);
+
+        public Component Clone()
+        {
+            // Create a new instance of the same concrete class
+            Component clone = Activator.CreateInstance(this.GetType()) as Component;
+
+            // Copy the properties to the new instance
+            clone.Color = this.Color;
+            clone.Position = this.Position;
+            clone.Width = this.Width;
+            clone.Height = this.Height;
+            clone.HP = this.HP;
+            clone.Ball = this.Ball;
+
+            // Decorator and other properties can be set if needed
+
+            clone.Decorator = this.Decorator;
+
+            return clone;
+        }
 
         public void Update()
         {
