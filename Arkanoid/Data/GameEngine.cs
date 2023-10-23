@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
+using Arkanoid.Data.Tiles.Decorator;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -21,12 +22,14 @@ namespace Arkanoid.Data
         public Paddle P2;
         public TileManager? tm;
         private System.Timers.Timer? timer;
+        private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
         private GameEngine()
         {
             Ball = new Ball(Window);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
         }
@@ -39,15 +42,11 @@ namespace Arkanoid.Data
             }
         }
 
-        public async Task InvertBallDirection(BounceDir dir, string pid)
+        public async Task InvertBallDirection(BounceDir dir)
         {
             if (dir == BounceDir.Vertical)
                 Ball.InvertY();
             else Ball.InvertX();
-            //if (hubConnection != null)
-            //{
-            //    await hubConnection.SendAsync("InvertBall", dir, pid);
-            //}
         }
 
         public void ConnectToHub(HubConnection hubConnection)
@@ -65,7 +64,7 @@ namespace Arkanoid.Data
             }
         }
 
-        public void RemoveTileFromCollisions(Tile tile)
+        public void RemoveTileFromCollisions(Component tile)
         {
             Ball.UnAttach(tile);
         }
@@ -111,9 +110,40 @@ namespace Arkanoid.Data
         }
         public async Task ResetBallPosition()
         {
-            Ball.SetPosition(0, 0);
+            Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
             // top = 0; left = 0;
-            Send();
+            _ = Send();
+        }
+        public void LoadLevel(int nr)
+        {
+            _ = StopTimer();
+            tm ??= new TileManager();
+            while (tm.tiles.Count>0)
+            {
+                _ = tm.DestroyTile(tm.tiles[0]);
+            }
+            switch (nr)
+            {
+                case 1:
+                    Vector2 offset = new Vector2(40, 20);
+                    Vector2 gap = new Vector2(20, 20);
+                    int width = 100;
+                    int height = 50;
+                    for (var i = 0; i < 3; i++)
+                    {
+                        for (var j = 0; j < 10; j++)
+                        {
+                            var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            Component tile = tf.CreateTile(TileType.Regular, pos);
+                            tm.tiles.Add(tile);
+                        }
+                    }
+                    Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
+                    SetBallMovementStrategy(new RegularBallStrategy());
+                    break;
+                default: break;
+            }
+            _ = Send();
         }
         public async Task SetBallPosition(int x, int y)
         {

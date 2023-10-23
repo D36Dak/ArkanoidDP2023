@@ -1,0 +1,19 @@
+﻿using Arkanoid.Data.PowerUps;
+
+namespace Arkanoid.Data.Adapter
+{
+    public class MoveAdapter : IMovable
+    {
+        public PowerUp Adaptee { get; private set; }
+
+        public MoveAdapter(PowerUp Adaptee)
+        {
+            this.Adaptee = Adaptee;
+        }
+
+        public void Move()
+        {
+            Adaptee.SpecificMove();
+        }
+    }
+}

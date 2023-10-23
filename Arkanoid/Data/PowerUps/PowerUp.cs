@@ -35,6 +35,11 @@ namespace Arkanoid.Data.PowerUps
         {
             Size = value;
         }
+
+        public virtual void SpecificMove()
+        {
+            Y -= 1;
+        }
     }
 
 
