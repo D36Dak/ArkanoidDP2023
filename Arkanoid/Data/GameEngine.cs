@@ -135,7 +135,9 @@ namespace Arkanoid.Data
                         {
                             var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             Component tile = tf.CreateTile(TileType.Regular, pos);
+                            Component tileCopy = tile.Clone();
                             tm.tiles.Add(tile);
+                            tm.tiles.Add(tileCopy);
                         }
                     }
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
