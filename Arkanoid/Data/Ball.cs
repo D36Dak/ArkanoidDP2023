@@ -75,27 +75,6 @@ namespace Arkanoid.Data
         public void Update()
         {
             Move();
-            //MoveAlgorithm.Move(this);
-            
-            //Console.WriteLine("Current speed is {0} : {1}", SpeedX, SpeedY);
-            //int x1 = GetNextX();
-            //int y1 = GetNextY();
-            //if (x1 > GameWindow.GetWidth() -BallSize || x1 < 0)
-            //{
-            //    InvertX();
-            //    x1 = GetNextX();
-            //}
-            //if (y1 > GameWindow.GetHeight() -BallSize || y1 < 0)
-            //{
-            //    InvertY();
-            //    y1 = GetNextY();
-            //}
-            //SetPosition(x1, y1);
-            //NotifyAll();
-            //Console.WriteLine("Next position should be {0} : {1}",x1, y1);
-            //Console.WriteLine(String.Format("{0} : {1}",SpeedX,SpeedY));
-            //IncrementLeft();
-            //IncrementTop();
         }
         public int GetX()
         {
