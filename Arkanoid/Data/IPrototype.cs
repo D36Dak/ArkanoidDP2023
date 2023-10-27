@@ -3,6 +3,6 @@
     public interface IPrototype<T>
     {
         public T Clone();
-        //public T DeepCopy();
+        public T DeepCopy();
     }
 }

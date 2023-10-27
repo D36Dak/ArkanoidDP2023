@@ -12,7 +12,7 @@ namespace Arkanoid.Data.Tiles.Decorator
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int HP { get; set; }
-        public Ball Ball { get; private set; }
+        public Ball Ball { get; set; }
         public Vector2 Middle
         {
             get
@@ -41,7 +41,7 @@ namespace Arkanoid.Data.Tiles.Decorator
         public abstract void OnHit(Component tile, Ball ball);
 
         public abstract Component Clone();
-        //public abstract Component DeepCopy();
+        public abstract Component DeepCopy();
 
     public void Update()
         {

@@ -23,10 +23,24 @@ namespace Arkanoid.Data.Tiles.Decorator
 
         }
 
+        //public override Component Clone()
+        //{
+        //    //return new ChangeColor(Component); // reik sukurt cia tile, bet xz
+        //    return (Component)this.MemberwiseClone();
+        //}
         public override Component Clone()
         {
-            //return new ChangeColor(Component); // reik sukurt cia tile, bet xz
-            return (ChangeColor)this.MemberwiseClone();
+            //return new RegularTile(Ball, Color, Position, HP);
+            Component c = (Component)this.MemberwiseClone();
+            Ball.Attach(c);
+            return c;
+        }
+
+        public override Component DeepCopy()
+        {
+            var newChangeColor = Clone();
+
+            return newChangeColor;
         }
     }
 }

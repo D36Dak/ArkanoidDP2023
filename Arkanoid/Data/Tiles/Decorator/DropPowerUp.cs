@@ -13,10 +13,25 @@ namespace Arkanoid.Data.Tiles.Decorator
             // instantiate power up and add it to dropping list or something...
         }
 
+        //public override Component Clone()
+        //{
+        //    //return new DropPowerUp(Component);
+        //    return (Component)this.MemberwiseClone();
+        //}
+
         public override Component Clone()
         {
-            //return new DropPowerUp(Component);
-            return (DropPowerUp)this.MemberwiseClone();
+            //return new RegularTile(Ball, Color, Position, HP);
+            Component c = (Component)this.MemberwiseClone();
+            Ball.Attach(c);
+            return c;
+        }
+
+        public override Component DeepCopy()
+        {
+            var newDropPowerUp = Clone();
+
+            return newDropPowerUp;
         }
     }
 }
