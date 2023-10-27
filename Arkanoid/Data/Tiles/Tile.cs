@@ -10,6 +10,6 @@ namespace Arkanoid.Data.Tiles
         public Tile(Ball ball, string color, Vector2 position, int hp = 1, Decorator.Decorator? decorator = null) : base(color, position, ball, decorator, hp)
         {
         }
-        
+
     }
 }

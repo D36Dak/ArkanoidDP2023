@@ -2,17 +2,17 @@
 
 namespace Arkanoid.Data.Tiles.Decorator
 {
-    public abstract class Component : IObserver
+    public abstract class Component : IObserver, IPrototype<Component>
     {
         private bool isInside = false;
         public string Color { get; set; }
         public Decorator? Decorator { get; set; }
         // top right corner
-        public Vector2 Position { get; private set; }
+        public Vector2 Position { get; set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int HP { get; set; }
-        public Ball Ball { get; private set; }
+        public Ball Ball { get; set; }
         public Vector2 Middle
         {
             get
@@ -40,7 +40,10 @@ namespace Arkanoid.Data.Tiles.Decorator
 
         public abstract void OnHit(Component tile, Ball ball);
 
-        public void Update()
+        public abstract Component Clone();
+        public abstract Component DeepCopy();
+
+    public void Update()
         {
             if (Ball.GetMiddleX() > Position.X && Ball.GetMiddleX() < Position.X + Width
                 && Ball.GetMiddleY() > Position.Y && Ball.GetMiddleY() < Position.Y + Height)

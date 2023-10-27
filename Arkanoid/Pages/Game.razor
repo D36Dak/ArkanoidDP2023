@@ -77,12 +77,24 @@
             TileManager tm = new TileManager();
             for (var i = 0; i < 3; i++)
             {
-                for (var j = 0; j < 10; j++)
+                var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
+                Component tile = tf.CreateTile(TileType.Regular, pos);
+                for (var j = 1; j < 10; j++)
                 {
-                    var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    Component tile = tf.CreateTile(TileType.Regular, pos);
-                    tm.tiles.Add(tile);
+                    // Shallow  copy
+                    Component clonedTile = tile.Clone();
+                    clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    tm.tiles.Add(clonedTile);
+
+                    //Deep copy
+                    Component deepClonedTile = tile.DeepCopy();
+                    deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    tm.tiles.Add(deepClonedTile);
+
+                    bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
+                    //string breakpoint = "breakpoint";
                 }
+                tm.tiles.Add(tile);
             }
             GE.tm = tm;
         }

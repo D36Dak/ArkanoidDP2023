@@ -24,5 +24,36 @@ namespace Arkanoid.Data.Tiles
             }
             throw new NotImplementedException();
         }
+
+        //public Component Clone(Component originalTile)
+        //{
+        //    if (originalTile is RegularTile regularTile)
+        //    {
+        //        // Clone a RegularTile
+        //        return new RegularTile(GameEngine.GetInstance().Ball, regularTile.Color, regularTile.Position, regularTile.HP);
+        //    }
+        //    else if (originalTile is HardTile hardTile)
+        //    {
+        //        // Clone a HardTile
+        //        return new HardTile(GameEngine.GetInstance().Ball, hardTile.Color, hardTile.Position);
+        //    }
+        //    // Handle other tile types if needed
+        //    throw new NotImplementedException();
+        //}
+
+        public Component Clone(Component tile)
+        {
+            if (tile is HardTile hardTile)
+            {
+                return hardTile.Clone();
+            }
+            else if (tile is RegularTile regularTile)
+            {
+                return regularTile.Clone();
+            }
+            // Add cases for other tile types if needed
+
+            return null; // Handle unknown tile types
+        }
     }
 }
