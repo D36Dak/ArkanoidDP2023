@@ -23,11 +23,6 @@ namespace Arkanoid.Data.Tiles.Decorator
 
         }
 
-        //public override Component Clone()
-        //{
-        //    //return new ChangeColor(Component); // reik sukurt cia tile, bet xz
-        //    return (Component)this.MemberwiseClone();
-        //}
         public override Component Clone()
         {
             //return new RegularTile(Ball, Color, Position, HP);
@@ -36,10 +31,14 @@ namespace Arkanoid.Data.Tiles.Decorator
             return c;
         }
 
+
         public override Component DeepCopy()
         {
+            // Create a new instance using Clone() (which will handle value types)
             var newChangeColor = Clone();
-
+            newChangeColor.Ball = new Ball(new GameWindow());
+            newChangeColor.Color = string.Copy(this.Color);
+            newChangeColor.Position = new Vector2(this.Position.X, this.Position.Y);
             return newChangeColor;
         }
     }

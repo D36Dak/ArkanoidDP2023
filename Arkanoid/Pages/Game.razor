@@ -87,11 +87,12 @@
                     tm.tiles.Add(clonedTile);
 
                     //Deep copy
-                    Component deepClonedTile = (Component)tile.DeepCopy();
+                    Component deepClonedTile = tile.DeepCopy();
                     deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                     tm.tiles.Add(deepClonedTile);
 
-                    bool areDifferent = !ReferenceEquals(clonedTile.Color, deepClonedTile.Color);
+                    bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
+                    //string breakpoint = "breakpoint";
                 }
                 tm.tiles.Add(tile);
             }

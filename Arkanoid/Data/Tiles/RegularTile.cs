@@ -45,12 +45,9 @@ namespace Arkanoid.Data.Tiles
 
             // Create new instances of any internal reference types or deep clone them
             newTile.Ball = new Ball(new GameWindow());
-
             // Example of cloning a string (if needed)
             newTile.Color = string.Copy(this.Color);
-
             newTile.Position = new Vector2(this.Position.X, this.Position.Y);
-
             newTile.HP = this.HP;
 
             return newTile;
