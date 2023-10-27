@@ -77,14 +77,15 @@
             TileManager tm = new TileManager();
             for (var i = 0; i < 3; i++)
             {
-                for (var j = 0; j < 10; j++)
+                var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
+                Component tile = tf.CreateTile(TileType.Regular, pos);
+                for (var j = 1; j < 10; j++)
                 {
-                    var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    Component tile = tf.CreateTile(TileType.Regular, pos);
-                    Component clonedTile = tf.Clone(tile);
-                    tm.tiles.Add(tile);
+                    Component clonedTile = tile.Clone();
+                    clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                     tm.tiles.Add(clonedTile);
                 }
+                tm.tiles.Add(tile);
             }
             GE.tm = tm;
         }

@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
 {
-    public class RegularTile : Tile, IPrototype<Tile>
+    public class RegularTile : Tile
     {
         public RegularTile(Ball ball, string color, Vector2 position, int hp = 1) : base(ball, color, position, hp)
         {
@@ -25,9 +25,17 @@ namespace Arkanoid.Data.Tiles
             }
         }
 
-        public override Tile Clone()
+        public override Component Clone()
         {
-            return new RegularTile(Ball, Color, Position, HP);
+            //return new RegularTile(Ball, Color, Position, HP);
+            return (Component)this.MemberwiseClone();
         }
+
+        //public override Component DeepCopy()
+        //{
+        //    var newComponent = Clone();
+
+        //    return newComponent;
+        //}
     }
 }

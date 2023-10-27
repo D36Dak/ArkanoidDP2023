@@ -22,5 +22,11 @@ namespace Arkanoid.Data.Tiles.Decorator
             //tile.TileManager.Connection.SendAsync("TileColor", tile.Position.X, tile.Position.Y, colors[random.Next(0, colors.Length)], tile.TileManager.Connection.ConnectionId);
 
         }
+
+        public override Component Clone()
+        {
+            //return new ChangeColor(Component); // reik sukurt cia tile, bet xz
+            return (ChangeColor)this.MemberwiseClone();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Arkanoid.Data.Tiles.Decorator;
+using System.Drawing;
 using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
@@ -16,5 +17,12 @@ namespace Arkanoid.Data.Tiles
             if (bounceDir == BounceDir.Horizontal) ball.InvertX();
             else ball.InvertY();
         }
+
+        public override Component Clone()
+        {
+            //return new HardTile(Ball, Color, Position);
+            return (HardTile)this.MemberwiseClone();
+        }
     }
+
 }

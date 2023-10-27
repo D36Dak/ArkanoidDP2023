@@ -8,7 +8,7 @@ namespace Arkanoid.Data.Tiles.Decorator
         public string Color { get; set; }
         public Decorator? Decorator { get; set; }
         // top right corner
-        public Vector2 Position { get; private set; }
+        public Vector2 Position { get; set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int HP { get; set; }
@@ -40,27 +40,10 @@ namespace Arkanoid.Data.Tiles.Decorator
 
         public abstract void OnHit(Component tile, Ball ball);
 
-        public Component Clone()
-        {
-            // Create a new instance of the same concrete class
-            Component clone = Activator.CreateInstance(this.GetType()) as Component;
+        public abstract Component Clone();
+        //public abstract Component DeepCopy();
 
-            // Copy the properties to the new instance
-            clone.Color = this.Color;
-            clone.Position = this.Position;
-            clone.Width = this.Width;
-            clone.Height = this.Height;
-            clone.HP = this.HP;
-            clone.Ball = this.Ball;
-
-            // Decorator and other properties can be set if needed
-
-            clone.Decorator = this.Decorator;
-
-            return clone;
-        }
-
-        public void Update()
+    public void Update()
         {
             if (Ball.GetMiddleX() > Position.X && Ball.GetMiddleX() < Position.X + Width
                 && Ball.GetMiddleY() > Position.Y && Ball.GetMiddleY() < Position.Y + Height)
