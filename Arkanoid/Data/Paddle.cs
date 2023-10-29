@@ -57,6 +57,18 @@
             X -= 5;
         }
 
+        public void Move(string direction)
+        {
+            if (string.Equals(direction, "Left", StringComparison.OrdinalIgnoreCase))
+            {
+                X -= 5;
+            }
+            else if (string.Equals(direction, "Right", StringComparison.OrdinalIgnoreCase))
+            {
+                X += 5;
+            }
+        }
+
         public void Update()
         {
             if (Ball != null)
