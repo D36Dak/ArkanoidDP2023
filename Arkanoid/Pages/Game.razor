@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using Arkanoid.Data.Command;
 @using Arkanoid.Data.Tiles;
 @using Arkanoid.Data.Tiles.Decorator;
 @using Microsoft.AspNetCore.SignalR.Client
@@ -50,6 +51,7 @@
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
+    PaddleController controller = new PaddleController();
     bool canStart = true;
 
     public void TEST()
@@ -69,6 +71,7 @@
         Vector2 gap = new Vector2(20, 20);
         int width = 100;
         int height = 50;
+        //PaddleController controller = new PaddleController();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
@@ -87,11 +90,11 @@
                     tm.tiles.Add(clonedTile);
 
                     //Deep copy
-                    Component deepClonedTile = tile.DeepCopy();
-                    deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    tm.tiles.Add(deepClonedTile);
+                    //Component deepClonedTile = tile.DeepCopy();
+                    //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    //tm.tiles.Add(deepClonedTile);
 
-                    bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
+                    //bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
                     //string breakpoint = "breakpoint";
                 }
                 tm.tiles.Add(tile);
@@ -167,18 +170,27 @@
     }
 
     private async Task KeyPressEvent(KeyboardEventArgs args)
-    {
+    {   
         if (myPlayer == null) return;
+
+        ICommand command = null;
+
         switch (args.Key)
         {
             case "a":
-                myPlayer.MoveRight();
-                await SendPaddlePosition(myPlayer);
+                //myPlayer.MoveRight();
+                command = new LeftCommand(myPlayer);
+                //await SendPaddlePosition(myPlayer);
                 break;
             case "d":
-                myPlayer.MoveLeft();
-                await SendPaddlePosition(myPlayer);
+                //myPlayer.MoveLeft();
+                command = new RightCommand(myPlayer);
+                //await SendPaddlePosition(myPlayer);
                 break;
+            case "x":
+                controller.Undo();
+                await SendPaddlePosition(myPlayer);
+                return;
             case "w":
                 if (GE is not null)
                 {
@@ -189,6 +201,13 @@
                 Console.WriteLine("Wrong key try a or d");
                 break;
 
+        }
+
+        if(command != null)
+        {
+            controller.SetCommand(command);
+            controller.Invoke();
+            await SendPaddlePosition(myPlayer);
         }
     }
 
