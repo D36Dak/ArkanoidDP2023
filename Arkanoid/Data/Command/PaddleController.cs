@@ -2,37 +2,38 @@
 {
     public class PaddleController
     {
-        private ICommand command;
-        private ICommand previousCommand;
+        private ICommand _command;
+        private ICommand _previousCommand;
 
         public PaddleController()
         {
             // Initialize the controller with no initial command
-            command = null;
-            previousCommand = null;
+            _command = null;
+            _previousCommand = null;
         }
 
         public void SetCommand(ICommand command)
         {
-            previousCommand = command; // Store the previous command for undo
-            command = command;
+            _command = command;
+        }
+
+
+        public void Undo()
+        {
+            if (_previousCommand != null)
+            {
+                _command = _previousCommand; // Restore the previous command for redo
+                _previousCommand = null;
+                _command.Undo();
+            }
         }
 
         public void Invoke()
         {
-            if (command != null)
+            if (_command != null)
             {
-                command.Execute();
-            }
-        }
-
-        public void Undo()
-        {
-            if (previousCommand != null)
-            {
-                command = previousCommand; // Restore the previous command for redo
-                previousCommand = null;
-                command.Undo();
+                _previousCommand = _command; // Store the current command as previous
+                _command.Execute();
             }
         }
     }
