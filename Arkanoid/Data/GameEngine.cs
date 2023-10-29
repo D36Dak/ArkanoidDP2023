@@ -135,9 +135,15 @@ namespace Arkanoid.Data
                         Component tile = tf.CreateTile(TileType.Regular, pos);
                         for (var j = 1; j < 10; j++)
                         {
+                            // Shallow copy
                             Component clonedTile = tile.Clone();
                             clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             tm.tiles.Add(clonedTile);
+
+                            //Deep copy
+                            //Component deepClonedTile = tile.DeepCopy();
+                            //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            //tm.tiles.Add(deepClonedTile);
                         }
                         tm.tiles.Add(tile);
                     }

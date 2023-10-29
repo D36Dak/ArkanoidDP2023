@@ -187,6 +187,10 @@
                 command = new RightCommand(myPlayer);
                 //await SendPaddlePosition(myPlayer);
                 break;
+            case "x":
+                controller.Undo();
+                await SendPaddlePosition(myPlayer);
+                return;
             case "w":
                 if (GE is not null)
                 {
