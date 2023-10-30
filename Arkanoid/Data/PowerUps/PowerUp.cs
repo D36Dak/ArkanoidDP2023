@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Arkanoid.Data;
 
 namespace Arkanoid.Data.PowerUps
 {
@@ -38,7 +39,12 @@ namespace Arkanoid.Data.PowerUps
 
         public virtual void SpecificMove()
         {
-            Y -= 1;
+            Y += 1;
+            GameEngine GE = GameEngine.GetInstance();
+            if (Y+Size>GE.GetWindowHeight())
+            {
+                GE.RemovePowerUp(this);
+            }
         }
     }
 

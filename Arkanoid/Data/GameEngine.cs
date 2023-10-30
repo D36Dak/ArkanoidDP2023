@@ -143,6 +143,10 @@ namespace Arkanoid.Data
                     {
                         var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
                         Component tile = tf.CreateTile(TileType.Regular, pos);
+                        if (i == 0)
+                        {
+                            tile = new DropPowerUp(tile);
+                        }
                         for (var j = 1; j < 10; j++)
                         {
                             // Shallow copy
@@ -159,6 +163,7 @@ namespace Arkanoid.Data
                     }
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     SetBallMovementStrategy(new RegularBallStrategy());
+                    visiblePowerUps = new List<PowerUp>();
                     break;
                 default: break;
             }
@@ -205,6 +210,12 @@ namespace Arkanoid.Data
             this.visiblePowerUps.Add(powerUp);
             MoveAdapter adapter = new MoveAdapter(powerUp);
             this.movables.Add(adapter);
+        }
+        public void RemovePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Remove(powerUp);
+            var toRemove = movables.OfType<MoveAdapter>().ToList();
+            toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
         }
     }
 }
