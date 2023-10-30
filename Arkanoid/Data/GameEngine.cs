@@ -2,6 +2,8 @@
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using Arkanoid.Data.Adapter;
+using Arkanoid.Data.PowerUps;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Data.Tiles.Decorator;
@@ -24,9 +26,13 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
+        private List<IMovable> movables;
+        public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         private GameEngine()
         {
+            movables = new List<IMovable>();
             Ball = new Ball(Window);
+            movables.Add(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
             ResetBallPosition();
@@ -79,7 +85,11 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            Ball.Update();
+            foreach (var movable in movables)
+            {
+                movable.Move();
+            }
+            //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
             Send();
         }
@@ -189,6 +199,12 @@ namespace Arkanoid.Data
         public void SetBallMovementStrategy(BallMoveAlgorithm strategy)
         {
             this.Ball.MoveAlgorithm = strategy;
+        }
+        public void AddVisiblePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Add(powerUp);
+            MoveAdapter adapter = new MoveAdapter(powerUp);
+            this.movables.Add(adapter);
         }
     }
 }
