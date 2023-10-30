@@ -2,6 +2,9 @@
 {
     public class NegativePowerUpFactory : PowerUpFactory
     {
+        PowerUpDirector director = new PowerUpDirector();
+        IPowerUpBuilder negativeBuilder = new NegativePowerUpBuilder();
+
         public NegativePowerUpFactory()
         {
             base.PowerUpTypes.Add("shrink");
@@ -13,14 +16,13 @@
             switch (type)
             {
                 case "shrink":
-                    return new Shrink(x, y);
+                    return director.Construct(negativeBuilder, x, y, "red", 25);
                 case "fastBall":
-                    return new FastBall(x, y);
+                    return director.Construct(negativeBuilder, x, y, "red", 25);
                 default:
                     break;
             }
             return null;
         }
-
     }
 }

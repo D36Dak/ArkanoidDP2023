@@ -1,4 +1,5 @@
-﻿using Arkanoid.Data.Tiles.Decorator;
+﻿using Arkanoid.Data.PowerUps;
+using Arkanoid.Data.Tiles.Decorator;
 using System.Drawing;
 using System.Numerics;
 
@@ -9,18 +10,21 @@ namespace Arkanoid.Data.Tiles
         public string Color { get; set; }
         public TileManager TileManager { get; private set; }
         public Decorator.Decorator? Decorator { get; set; }
-        // top right corner
         public Vector2 Position { get; private set; }
-        public Vector2 Middle { 
+        public Vector2 Middle
+        {
             get
             {
-                return new Vector2(Position.X + Width/2, Position.Y + Height/2);
-            } 
+                return new Vector2(Position.X + Width / 2, Position.Y + Height / 2);
+            }
         }
         public int Width { get; private set; }
         public int Height { get; private set; }
         protected Ball ball { get; private set; }
-        public Tile(Ball ball, string color, Vector2 position, TileManager tileManager, Decorator.Decorator? decorator = null, int width = 100, int height = 50)
+
+        protected IPowerUpEffect powerUpEffect;  // The Bridge
+
+        public Tile(Ball ball, string color, Vector2 position, TileManager tileManager, IPowerUpEffect powerUpEffect, Decorator.Decorator? decorator = null, int width = 100, int height = 50)
         {
             Color = color;
             Position = position;
@@ -30,6 +34,7 @@ namespace Arkanoid.Data.Tiles
             Height = height;
             TileManager = tileManager;
             Decorator = decorator;
+            this.powerUpEffect = powerUpEffect;  // Initialized the Bridge
         }
 
         ~Tile()
@@ -59,6 +64,15 @@ namespace Arkanoid.Data.Tiles
             }
             else
                 isInside = false;
+        }
+        public void ActivatePowerUp()
+        {
+            powerUpEffect.ApplyEffect();
+        }
+
+        public void DeactivatePowerUp()
+        {
+            powerUpEffect.RemoveEffect();
         }
     }
 }

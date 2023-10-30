@@ -63,5 +63,10 @@
                 }
             }
         }
+        public void SetWidth(int width)
+        {
+            Width = width;
+        }
+
     }
 }

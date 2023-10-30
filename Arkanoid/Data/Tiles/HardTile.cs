@@ -1,10 +1,11 @@
-﻿using System.Numerics;
+﻿using Arkanoid.Data.PowerUps;
+using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
 {
     public class HardTile : Tile
     {
-        public HardTile(Ball ball, string color, Vector2 position, TileManager tm) : base(ball, color, position, tm)
+        public HardTile(Ball ball, string color, Vector2 position, TileManager tm, IPowerUpEffect powerUpEffect) : base(ball, color, position, tm, powerUpEffect)
         {
         }
 

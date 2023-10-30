@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using Arkanoid.Data.PowerUps;
 @using Arkanoid.Data.Tiles;
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Timers
@@ -57,13 +58,16 @@
         .Build();
         if (GE.tm is null)
         {
+           
+            Paddle myPaddle = GE.P1;
             tm = new TileManager(hubConnection);
+            IPowerUpEffect expandEffect = new ExpandEffect(myPaddle);
             for (var i = 0; i < 3; i++)
             {
                 for (var j = 0; j < 10; j++)
                 {
                     var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    Tile tile = tf.CreateTile(TileType.Regular, pos, tm);
+                    Tile tile = tf.CreateTile(TileType.Regular, pos, tm, expandEffect);
                     tm.tiles.Add(tile);
                 }
             }
