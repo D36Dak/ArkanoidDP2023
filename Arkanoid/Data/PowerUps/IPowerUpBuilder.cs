@@ -2,9 +2,9 @@
 {
     public interface IPowerUpBuilder
     {
-        void SetPosition(int x, int y);
-        void SetColor(string color);
-        void SetSize(int size);
+        IPowerUpBuilder SetPosition(int x, int y);
+        IPowerUpBuilder SetColor(string color);
+        IPowerUpBuilder SetSize(int size);
         PowerUp Build();
     }
 }

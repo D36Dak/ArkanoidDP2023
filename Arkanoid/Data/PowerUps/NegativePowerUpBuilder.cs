@@ -2,24 +2,42 @@
 
 namespace Arkanoid.Data.PowerUps
 {
+    public enum NegativePUType { FastBall, Shrink}
     public class NegativePowerUpBuilder : IPowerUpBuilder
     {
         private PowerUp powerUp = new ConcreteNegativePowerUp(0, 0, "red", 0);
-
-        public void SetPosition(int x, int y)
+        public NegativePowerUpBuilder() { }
+        public NegativePowerUpBuilder(NegativePUType type)
+        {
+            switch (type)
+            {
+                case NegativePUType.FastBall:
+                    powerUp = new FastBall(0, 0);
+                    break;
+                case NegativePUType.Shrink:
+                    powerUp = new Shrink(0, 0);
+                    break;
+                default:
+                    break;
+            }
+        }
+        public IPowerUpBuilder SetPosition(int x, int y)
         {
             powerUp.SetX(x);
             powerUp.SetY(y);
+            return this;
         }
 
-        public void SetColor(string color)
+        public IPowerUpBuilder SetColor(string color)
         {
             powerUp.SetColor(color);
+            return this;
         }
 
-        public void SetSize(int size)
+        public IPowerUpBuilder SetSize(int size)
         {
             powerUp.SetSize(size);
+            return this;
         }
 
         public PowerUp Build()
