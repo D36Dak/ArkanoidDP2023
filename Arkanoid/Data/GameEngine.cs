@@ -164,6 +164,8 @@ namespace Arkanoid.Data
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     SetBallMovementStrategy(new RegularBallStrategy());
                     visiblePowerUps = new List<PowerUp>();
+                    movables = new List<IMovable>();
+                    movables.Add(Ball);
                     break;
                 default: break;
             }
