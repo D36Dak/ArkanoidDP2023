@@ -83,7 +83,7 @@
         private void BounceBall()
         {
             int hitOffset = Ball.GetMiddleX() - X;
-            int step = Width / 5;
+            int step = Width / 4;
             int stepCount = hitOffset / step;
             switch (stepCount)
             {
@@ -91,7 +91,8 @@
                 case 1: Ball.SetSpeed(-2,-4); break;
                 case 2: Ball.SetSpeed(2, -4); break;
                 case 3: Ball.SetSpeed(3, -3); break;
-                    default: break;
+                    default: Ball.InvertY();
+                    break;
             }
         }
     }
