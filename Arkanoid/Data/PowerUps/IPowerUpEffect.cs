@@ -2,7 +2,7 @@
 {
     public interface IPowerUpEffect
     {
-        void ApplyEffect();
-        void RemoveEffect();
+        void ApplyEffect(PowerUp implementor);
+        void RemoveEffect(PowerUp implementor);
     }
 }

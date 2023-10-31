@@ -65,14 +65,6 @@ namespace Arkanoid.Data.Tiles
             else
                 isInside = false;
         }
-        public void ActivatePowerUp()
-        {
-            powerUpEffect.ApplyEffect();
-        }
-
-        public void DeactivatePowerUp()
-        {
-            powerUpEffect.RemoveEffect();
-        }
+       
     }
 }

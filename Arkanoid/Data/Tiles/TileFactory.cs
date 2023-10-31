@@ -22,7 +22,6 @@ namespace Arkanoid.Data.Tiles
                 case TileType.Hard:
                     return new HardTile(GameEngine.GetInstance().Ball, "gray", pos, tm, powerUpEffect);
                 case TileType.Explosive:
-                    // Čia galite pridėti kodą, jei reikia
                     break;
                 default:
                     break;
