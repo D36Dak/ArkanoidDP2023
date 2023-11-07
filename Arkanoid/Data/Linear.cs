@@ -1,4 +1,5 @@
 ﻿using Arkanoid.Data.Tiles;
+using Arkanoid.Data.Tiles.Decorator;
 using System.Numerics;
 
 namespace Arkanoid.Data
@@ -26,7 +27,7 @@ namespace Arkanoid.Data
             return -(coeffs.Y * y + coeffs.Z) / coeffs.X;
         }
 
-        public static BounceDir GetBounceOffDirection(Tile tile, Ball ball)
+        public static BounceDir GetBounceOffDirection(Component tile, Ball ball)
         {
             Vector3 Line1Coeffs = GetLineCoeffs(tile.Position, new Vector2(tile.Position.X + tile.Width, tile.Position.Y + tile.Height));
 

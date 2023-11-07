@@ -1,15 +1,29 @@
-﻿namespace Arkanoid.Data.Tiles.Decorator
+﻿using Microsoft.AspNetCore.Components;
+using System.Numerics;
+
+namespace Arkanoid.Data.Tiles.Decorator
 {
     public abstract class Decorator : Component
     {
-        protected Component? Component;
-        public void SetComponent(Component component)
+        protected Component Component;
+
+        protected Decorator(Component component) : base(component.Color, component.Position, component.Ball, component.Decorator, component.HP, component.Width, component.Height)
         {
+            Ball.UnAttach(component);
             Component = component;
         }
-        public override void OnHit(Tile tile, Ball ball)
+
+        protected Decorator(string color, Vector2 position, Ball ball, Decorator decorator, int hp, int width, int height, Component component)
+        : base(color, position, ball, decorator, hp, width, height)
         {
-            Component?.OnHit(tile, ball);
+            Ball.UnAttach(component);
+            Component = component;
         }
+
+        public override void OnHit(Component tile, Ball ball)
+        {
+            Component.OnHit(tile, ball);
+        }
+
     }
 }

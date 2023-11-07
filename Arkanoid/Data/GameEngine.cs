@@ -2,7 +2,11 @@
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using Arkanoid.Data.Adapter;
+using Arkanoid.Data.PowerUps;
+using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
+using Arkanoid.Data.Tiles.Decorator;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -20,12 +24,18 @@ namespace Arkanoid.Data
         public Paddle P2;
         public TileManager? tm;
         private System.Timers.Timer? timer;
+        private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
+        private List<IMovable> movables;
+        public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         private GameEngine()
         {
+            movables = new List<IMovable>();
             Ball = new Ball(Window);
+            movables.Add(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
         }
@@ -38,15 +48,11 @@ namespace Arkanoid.Data
             }
         }
 
-        public async Task InvertBallDirection(BounceDir dir, string pid)
+        public async Task InvertBallDirection(BounceDir dir)
         {
             if (dir == BounceDir.Vertical)
                 Ball.InvertY();
             else Ball.InvertX();
-            //if (hubConnection != null)
-            //{
-            //    await hubConnection.SendAsync("InvertBall", dir, pid);
-            //}
         }
 
         public void ConnectToHub(HubConnection hubConnection)
@@ -64,7 +70,7 @@ namespace Arkanoid.Data
             }
         }
 
-        public void RemoveTileFromCollisions(Tile tile)
+        public void RemoveTileFromCollisions(Component tile)
         {
             Ball.UnAttach(tile);
         }
@@ -79,7 +85,11 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            Ball.Update();
+            foreach (var movable in movables)
+            {
+                movable.Move();
+            }
+            //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
             Send();
         }
@@ -110,9 +120,56 @@ namespace Arkanoid.Data
         }
         public async Task ResetBallPosition()
         {
-            Ball.SetPosition(0, 0);
+            Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
             // top = 0; left = 0;
-            Send();
+            _ = Send();
+        }
+        public void LoadLevel(int nr)
+        {
+            _ = StopTimer();
+            tm ??= new TileManager();
+            while (tm.tiles.Count>0)
+            {
+                _ = tm.DestroyTile(tm.tiles[0]);
+            }
+            switch (nr)
+            {
+                case 1:
+                    Vector2 offset = new Vector2(40, 20);
+                    Vector2 gap = new Vector2(20, 20);
+                    int width = 100;
+                    int height = 50;
+                    for (var i = 0; i < 3; i++)
+                    {
+                        var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
+                        Component tile = tf.CreateTile(TileType.Regular, pos);
+                        if (i == 0)
+                        {
+                            tile = new DropPowerUp(tile);
+                        }
+                        for (var j = 1; j < 10; j++)
+                        {
+                            // Shallow copy
+                            Component clonedTile = tile.Clone();
+                            clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            tm.tiles.Add(clonedTile);
+
+                            //Deep copy
+                            //Component deepClonedTile = tile.DeepCopy();
+                            //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            //tm.tiles.Add(deepClonedTile);
+                        }
+                        tm.tiles.Add(tile);
+                    }
+                    Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
+                    SetBallMovementStrategy(new RegularBallStrategy());
+                    visiblePowerUps = new List<PowerUp>();
+                    movables = new List<IMovable>();
+                    movables.Add(Ball);
+                    break;
+                default: break;
+            }
+            _ = Send();
         }
         public async Task SetBallPosition(int x, int y)
         {
@@ -145,6 +202,22 @@ namespace Arkanoid.Data
         public int GetBallSize()
         {
             return Ball.GetSize();
+        }
+        public void SetBallMovementStrategy(BallMoveAlgorithm strategy)
+        {
+            this.Ball.MoveAlgorithm = strategy;
+        }
+        public void AddVisiblePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Add(powerUp);
+            MoveAdapter adapter = new MoveAdapter(powerUp);
+            this.movables.Add(adapter);
+        }
+        public void RemovePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Remove(powerUp);
+            var toRemove = movables.OfType<MoveAdapter>().ToList();
+            toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
         }
     }
 }

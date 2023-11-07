@@ -13,16 +13,17 @@
 
         public override PowerUp CreatePowerUp(string type, int x, int y)
         {
+            PowerUpDirector pd = new PowerUpDirector();
             switch (type)
             {
                 case "shrink":
-                    return director.Construct(negativeBuilder, x, y, "red", 25);
+                    return pd.ConstructShrink(x,y);
                 case "fastBall":
-                    return director.Construct(negativeBuilder, x, y, "red", 25);
+                    return pd.ConstructFastBall(x,y);
                 default:
                     break;
             }
-            return null;
+            throw new ArgumentException(string.Format("{0} is not a valid powerup type", type));
         }
     }
 }

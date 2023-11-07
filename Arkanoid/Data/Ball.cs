@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+﻿using Arkanoid.Data.Adapter;
+using Arkanoid.Data.Strategy;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Xml;
 
 namespace Arkanoid.Data
 {
-    public class Ball : ISubject
+    public class Ball : ISubject, IMovable
     {
         private int X;
         private int Y;
@@ -13,11 +15,13 @@ namespace Arkanoid.Data
         private int BallSize = 20;
         private GameWindow GameWindow;
         public string? Pid { get; set; } = null;
+        public BallMoveAlgorithm MoveAlgorithm { private get; set; }
 
         public List<IObserver> Observers = new();
 
         public Ball(GameWindow gameWindow)
         {
+            MoveAlgorithm = new RegularBallStrategy();
             X = 0;
             Y = 0;
             GameWindow = gameWindow;
@@ -26,6 +30,7 @@ namespace Arkanoid.Data
         }
         public Ball(int x, int y, GameWindow gameWindow)
         {
+            MoveAlgorithm = new RegularBallStrategy();
             X = x;
             Y = y;
             GameWindow = gameWindow;
@@ -60,28 +65,16 @@ namespace Arkanoid.Data
         {
             return this.Y + this.SpeedY;
         }
+
+        public void Move()
+        {
+            MoveAlgorithm.Move(this);
+        }
+
         //todo - fix avoiding walls at distance,calculate distance to wall and subtract from final position
         public void Update()
         {
-            //Console.WriteLine("Current speed is {0} : {1}", SpeedX, SpeedY);
-            int x1 = GetNextX();
-            int y1 = GetNextY();
-            if (x1 > GameWindow.GetWidth() -BallSize || x1 < 0)
-            {
-                InvertX();
-                x1 = GetNextX();
-            }
-            if (y1 > GameWindow.GetHeight() -BallSize || y1 < 0)
-            {
-                InvertY();
-                y1 = GetNextY();
-            }
-            SetPosition(x1, y1);
-            NotifyAll();
-            //Console.WriteLine("Next position should be {0} : {1}",x1, y1);
-            //Console.WriteLine(String.Format("{0} : {1}",SpeedX,SpeedY));
-            //IncrementLeft();
-            //IncrementTop();
+            Move();
         }
         public int GetX()
         {
@@ -113,9 +106,14 @@ namespace Arkanoid.Data
         {
             return this.GameWindow.GetHeight();
         }
+        public int GetWindowWidth()
+        {
+            return this.GameWindow.GetWidth();
+        }
 
         public void Attach(IObserver observer)
         {
+            if (Observers.Contains(observer)) return;
             Observers.Add(observer);
         }
 
@@ -123,7 +121,6 @@ namespace Arkanoid.Data
         {
             Observers.Remove(observer);
         }
-
         public void NotifyAll()
         {
             // had to convert to list because getting operation not permitted..

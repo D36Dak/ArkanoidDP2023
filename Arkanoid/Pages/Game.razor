@@ -1,10 +1,13 @@
 ﻿@page "/game"
 @using Arkanoid.Data.PowerUps;
+@using Arkanoid.Data.Command;
 @using Arkanoid.Data.Tiles;
+@using Arkanoid.Data.Tiles.Decorator;
 @using Microsoft.AspNetCore.SignalR.Client
 @using System.Timers
 @using Arkanoid.Data
 @using System.Numerics;
+@using Arkanoid.Data.Strategy;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
@@ -15,6 +18,15 @@
 <button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
 <button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
 <button class="btn btn-primary" @onclick="Subscribe">Join game</button>
+<div>
+    <button class="btn btn-secondary" @onclick="RegularBall">Regular Ball</button>
+    <button class="btn btn-secondary" @onclick="FastBall">Fast Ball</button>
+    <button class="btn btn-secondary" @onclick="TeleportingBall">Teleporting Ball</button>
+</div>
+<h1 class="text-primary">Level select</h1>
+<div>
+    <button class="btn btn-primary" @onclick="LoadLevel">LEVEL 1</button>
+</div>
 
 @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
 <div id="level" @onkeypress="KeyPressEvent"
@@ -29,8 +41,16 @@
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
+        @if (GE.visiblePowerUps is not null)
+        {
+            @foreach (var pu in GE.visiblePowerUps)
+            {
+                <div style="background: @(pu.Color); width: @(pu.Size)px; height: @(pu.Size)px; position: absolute; top: @(pu.Y)px; left: @(pu.X)px;"></div>
+            }
+        }
     }
 </div>
+<button @onclick="TEST">TEST</button>
 <br />
 
 @code {
@@ -39,8 +59,14 @@
     private Paddle P1;
     private Paddle P2;
     private Paddle? myPlayer;
-    private TileManager? tm;
+    PaddleController controller = new PaddleController();
     bool canStart = true;
+
+    public void TEST()
+    {
+        GE.tm.DestroyTile(GE.tm.tiles[0]);
+
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,27 +79,37 @@
         Vector2 gap = new Vector2(20, 20);
         int width = 100;
         int height = 50;
+        //PaddleController controller = new PaddleController();
         hubConnection = new HubConnectionBuilder()
         .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
         .Build();
         if (GE.tm is null)
         {
-           
-            Paddle myPaddle = GE.P1;
-            tm = new TileManager(hubConnection);
-            IPowerUpEffect expandEffect = new ExpandEffect();
+            TileManager tm = new TileManager();
             for (var i = 0; i < 3; i++)
             {
-                for (var j = 0; j < 10; j++)
+                var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
+                Component tile = tf.CreateTile(TileType.Regular, pos);
+                for (var j = 1; j < 10; j++)
                 {
-                    var pos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    Tile tile = tf.CreateTile(TileType.Regular, pos, tm, expandEffect);
-                    tm.tiles.Add(tile);
+                    // Shallow  copy
+                    Component clonedTile = tile.Clone();
+                    clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    tm.tiles.Add(clonedTile);
+
+                    //Deep copy
+                    //Component deepClonedTile = tile.DeepCopy();
+                    //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                    //tm.tiles.Add(deepClonedTile);
+
+                    //bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
+                    //string breakpoint = "breakpoint";
                 }
+                tm.tiles.Add(tile);
             }
             GE.tm = tm;
         }
-        
+
         GE.ConnectToHub(hubConnection);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
@@ -142,22 +178,44 @@
     }
 
     private async Task KeyPressEvent(KeyboardEventArgs args)
-    {
+    {   
         if (myPlayer == null) return;
+
+        ICommand command = null;
+
         switch (args.Key)
         {
             case "a":
-                myPlayer.MoveRight();
-                await SendPaddlePosition(myPlayer);
+                //myPlayer.MoveRight();
+                command = new LeftCommand(myPlayer);
+                //await SendPaddlePosition(myPlayer);
                 break;
             case "d":
-                myPlayer.MoveLeft();
+                //myPlayer.MoveLeft();
+                command = new RightCommand(myPlayer);
+                //await SendPaddlePosition(myPlayer);
+                break;
+            case "x":
+                controller.Undo();
                 await SendPaddlePosition(myPlayer);
+                return;
+            case "w":
+                if (GE is not null)
+                {
+                    await GE.StartTimer();
+                }
                 break;
             default:
                 Console.WriteLine("Wrong key try a or d");
                 break;
 
+        }
+
+        if(command != null)
+        {
+            controller.SetCommand(command);
+            controller.Invoke();
+            await SendPaddlePosition(myPlayer);
         }
     }
 
@@ -187,6 +245,31 @@
         {
             await hubConnection.DisposeAsync();
         }
+    }
+    private void RegularBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new RegularBallStrategy());
+        }
+    }
+    private void FastBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new FastBallStrategy());
+        }
+    }
+    private void TeleportingBall()
+    {
+        if (GE is not null)
+        {
+            GE.SetBallMovementStrategy(new TeleportSideStrategy());
+        }
+    }
+    private void LoadLevel()
+    {
+        GE.LoadLevel(1);
     }
     //----------------------------------------
 }

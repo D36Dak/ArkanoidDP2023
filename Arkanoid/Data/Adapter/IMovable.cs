@@ -1,0 +1,7 @@
+﻿namespace Arkanoid.Data.Adapter
+{
+    public interface IMovable
+    {
+        public void Move();
+    }
+}

@@ -13,12 +13,13 @@
 
         public override PowerUp CreatePowerUp(string type, int x, int y)
         {
+            PowerUpDirector pd = new PowerUpDirector();
             switch (type)
             {
                 case "expand":
-                    return director.Construct(positiveBuilder, x, y, "green", 30);
+                    return pd.ConstructExpand(x, y);
                 case "piercingBall":
-                    return director.Construct(positiveBuilder, x, y, "green", 30);
+                    return pd.ConstructPiercing(x, y);
                 default:
                     break;
             }
