@@ -47,6 +47,7 @@ namespace Arkanoid.Data.PowerUps
         public void DeactivatePowerUp()
         {
             powerUpEffect.RemoveEffect(this);
+        }
             
         public virtual void SpecificMove()
         {
