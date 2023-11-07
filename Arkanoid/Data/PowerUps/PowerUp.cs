@@ -3,12 +3,14 @@ using Arkanoid.Data;
 
 namespace Arkanoid.Data.PowerUps
 {
-    public abstract class PowerUp
+    public abstract class PowerUp : IEffectImplementer
     {
+        public Paddle? Catcher { get; set; }
         public int X { get; protected set; }
         public int Y { get; protected set; }
         public string Color { get; protected set; }
         public int Size { get; protected set; }
+        public IPowerUpEffect powerUpEffect { get; protected set; }
 
         public PowerUp(int x, int y, string color, int size)
         {
@@ -37,6 +39,15 @@ namespace Arkanoid.Data.PowerUps
             Size = value;
         }
 
+        public void ActivatePowerUp()
+        {
+            powerUpEffect.ApplyEffect(this);
+        }
+
+        public void DeactivatePowerUp()
+        {
+            powerUpEffect.RemoveEffect(this);
+            
         public virtual void SpecificMove()
         {
             Y += 1;
@@ -47,6 +58,7 @@ namespace Arkanoid.Data.PowerUps
             }
         }
     }
+
 
 
 }

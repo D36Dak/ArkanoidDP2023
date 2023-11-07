@@ -1,4 +1,5 @@
-﻿using Arkanoid.Data.Tiles.Decorator;
+﻿using Arkanoid.Data.PowerUps;
+using Arkanoid.Data.Tiles.Decorator;
 using System.Drawing;
 using System.Numerics;
 

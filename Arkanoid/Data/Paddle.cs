@@ -80,6 +80,12 @@
                 }
             }
         }
+        
+        public void SetWidth(int width)
+        {
+            Width = width;
+        }
+
         private void BounceBall()
         {
             int hitOffset = Ball.GetMiddleX() - X;
