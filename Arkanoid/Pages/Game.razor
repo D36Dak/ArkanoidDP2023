@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using Arkanoid.Data.PowerUps;
 @using Arkanoid.Data.Command;
 @using Arkanoid.Data.Tiles;
 @using Arkanoid.Data.Tiles.Decorator;
@@ -39,6 +40,13 @@
         @foreach (var tile in GE.tm.tiles.ToList())
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
+        }
+        @if (GE.visiblePowerUps is not null)
+        {
+            @foreach (var pu in GE.visiblePowerUps)
+            {
+                <div style="background: @(pu.Color); width: @(pu.Size)px; height: @(pu.Size)px; position: absolute; top: @(pu.Y)px; left: @(pu.X)px;"></div>
+            }
         }
     }
 </div>

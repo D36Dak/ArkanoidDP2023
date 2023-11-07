@@ -1,4 +1,5 @@
-﻿using Arkanoid.Data.Tiles.Decorator;
+﻿using Arkanoid.Data.PowerUps;
+using Arkanoid.Data.Tiles.Decorator;
 using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
@@ -6,6 +7,7 @@ namespace Arkanoid.Data.Tiles
     public enum TileType { Regular, Hard, Explosive }
     public class TileFactory
     {
+        
         private Random random = new();
         public Component CreateTile(TileType tileType, Vector2 pos)
         {
