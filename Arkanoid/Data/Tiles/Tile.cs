@@ -12,5 +12,26 @@ namespace Arkanoid.Data.Tiles
         {
         }
 
+        // template parameters
+        public abstract void BounceOff(Component tile, Ball ball);
+        public virtual void ReduceHP(Component tile, Ball ball) { }
+        public virtual bool NeedReduceHP(Component tile, Ball ball) { return false; }
+        public virtual bool NeedDestroy(Component tile, Ball ball) { return false; }
+        public virtual void Destroy(Component tile, Ball ball) { }
+
+        // template method
+        public override sealed void OnHit(Component tile, Ball ball)
+        {
+            BounceOff(tile, ball);
+            if(NeedReduceHP(tile, ball))
+            {
+                ReduceHP(tile, ball);
+            }
+            if(NeedDestroy(tile, ball))
+            {
+                Destroy(tile, ball);
+            }
+        }
+
     }
 }
