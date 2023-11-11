@@ -39,6 +39,19 @@ namespace Arkanoid.Data
             SetSpeed(3, 3);
             SetupTimer();
         }
+
+        public List<Component> GetTilesInRadius(Component tile, int radius)
+        {
+            var tilesInRadius = new List<Component>();
+            if(tm == null) return tilesInRadius;
+            foreach(var t in tm.tiles)
+            {
+                var dist = Vector2.Distance(t.Position, tile.Position);
+                if(dist <= radius) tilesInRadius.Add(t);
+            }
+            return tilesInRadius;
+        }
+
         public static GameEngine GetInstance()
         {
             lock (ThreadLock)

@@ -20,7 +20,7 @@ namespace Arkanoid.Data.Tiles
                 case TileType.Hard:
                     return new HardTile(GameEngine.GetInstance().Ball, "gray", pos);
                 case TileType.Explosive:
-                    break;
+                    return new ExplodingTile(GameEngine.GetInstance().Ball, "yellow", pos);
                 default:
                     break;
             }

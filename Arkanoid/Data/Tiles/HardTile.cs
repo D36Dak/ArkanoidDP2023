@@ -11,19 +11,11 @@ namespace Arkanoid.Data.Tiles
         {
         }
 
-        public override void OnHit(Component tile, Ball ball)
+        public override void BounceOff(Component tile, Ball ball)
         {
-            // just bounce off
-            var bounceDir = Linear.GetBounceOffDirection(this, ball);
-            if (bounceDir == BounceDir.Horizontal) ball.InvertX();
-            else ball.InvertY();
+            var bounceDir = Linear.GetBounceOffDirection(tile, ball);
+            GameEngine.GetInstance().InvertBallDirection(bounceDir);
         }
-
-        //public override Component Clone()
-        //{
-        //    //return new HardTile(Ball, Color, Position);
-        //    return (Component)this.MemberwiseClone();
-        //}
 
         public override Component Clone()
         {
