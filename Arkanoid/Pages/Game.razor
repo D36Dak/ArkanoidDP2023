@@ -85,36 +85,7 @@
         .Build();
         if (GE.tm is null)
         {
-            TileManager tm = new TileManager();
-            for (var i = 0; i < 3; i++)
-            {
-                var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
-                Component tile = tf.CreateTile(TileType.Regular, pos);
-                for (var j = 1; j < 10; j++)
-                {
-                    Vector2 newPos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    if(i == 2 && j == 4)
-                    {
-                        Component explosive = tf.CreateTile(TileType.Explosive, newPos);
-                        tm.tiles.Add(explosive);
-                        continue;
-                    }
-                    // Shallow  copy
-                    Component clonedTile = tile.Clone();
-                    clonedTile.Position = newPos;
-                    tm.tiles.Add(clonedTile);
-
-                    //Deep copy
-                    //Component deepClonedTile = tile.DeepCopy();
-                    //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    //tm.tiles.Add(deepClonedTile);
-
-                    //bool areDifferent = !ReferenceEquals(tile.Color, deepClonedTile.Color);
-                    //string breakpoint = "breakpoint";
-                }
-                tm.tiles.Add(tile);
-            }
-            GE.tm = tm;
+            GE.LoadLevel(1);
         }
 
         GE.ConnectToHub(hubConnection);
@@ -257,21 +228,21 @@
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new RegularBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Regular));
         }
     }
     private void FastBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new FastBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Fast));
         }
     }
     private void TeleportingBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new TeleportSideStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Teleport));
         }
     }
     private void LoadLevel()

@@ -160,8 +160,16 @@ namespace Arkanoid.Data
                         {
                             tile = new DropPowerUp(tile);
                         }
+
                         for (var j = 1; j < 10; j++)
                         {
+                            Vector2 newPos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            if (i == 2 && j == 4)
+                            {
+                                Component explosive = tf.CreateTile(TileType.Explosive, newPos);
+                                tm.tiles.Add(explosive);
+                                continue;
+                            }
                             // Shallow copy
                             Component clonedTile = tile.Clone();
                             clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
@@ -171,6 +179,8 @@ namespace Arkanoid.Data
                             //Component deepClonedTile = tile.DeepCopy();
                             //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             //tm.tiles.Add(deepClonedTile);
+
+                            
                         }
                         tm.tiles.Add(tile);
                     }
