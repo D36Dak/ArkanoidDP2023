@@ -8,6 +8,7 @@
 @using Arkanoid.Data
 @using System.Numerics;
 @using Arkanoid.Data.Strategy;
+@using Arkanoid.Data.Logger;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
@@ -71,6 +72,9 @@
     protected override async Task OnInitializedAsync()
     {
         GE = GameEngine.GetInstance();
+        LoggerSingleton.GetInstance().Log("This is printing information", LogLevel.INFO);
+        LoggerSingleton.GetInstance().Log("This is a warning", LogLevel.WARN);
+        LoggerSingleton.GetInstance().Log("This is an error", LogLevel.ERROR);
         P1 = GE.P1;
         P2 = GE.P2;
         TileFactory tf = new();
