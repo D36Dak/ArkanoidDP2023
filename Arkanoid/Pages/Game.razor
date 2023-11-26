@@ -9,10 +9,16 @@
 @using System.Numerics;
 @using Arkanoid.Data.Strategy;
 @using Arkanoid.Data.Logger;
+@using Arkanoid.Data.Composite;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
 <PageTitle>Game</PageTitle>
+
+@if (menuMarkup != null)
+{
+    @((MarkupString)menuMarkup)
+}
 
 <h1>Game view</h1>
 <button class="btn btn-primary" disabled="@(!canStart)" @onclick="GE.StartTimer">Start</button>
@@ -62,11 +68,41 @@
     private Paddle? myPlayer;
     PaddleController controller = new PaddleController();
     bool canStart = true;
+    public MarkupString? menuMarkup = null;
 
     public void TEST()
     {
         GE.tm.DestroyTile(GE.tm.tiles[0]);
 
+    }
+
+    private void CreateMenu()
+    {
+
+        List<MenuComponent> menuItems = new()
+        {
+            new MenuComposite(
+                new()
+                {
+                    new MenuItem("Start", "GE.StartTimer"),
+                    new MenuItem("Stop"),
+                    new MenuItem("Reset"),
+                    new MenuItem("Join Game")
+                },
+                "Game management"),
+            new MenuComposite(
+                new()
+                {
+                    new MenuItem("Regular Ball"),
+                    new MenuItem("Fast Ball"),
+                    new MenuItem("Teleporting Ball")
+                },
+                "Ball strategies"
+            )
+        };
+        
+        MenuComposite mcomp = new MenuComposite(menuItems, "Menu composite");
+        menuMarkup = new MarkupString(mcomp.GetHTML());
     }
 
     protected override async Task OnInitializedAsync()
@@ -75,6 +111,9 @@
         LoggerSingleton.GetInstance().Log("This is printing information", LogLevel.INFO);
         LoggerSingleton.GetInstance().Log("This is a warning", LogLevel.WARN);
         LoggerSingleton.GetInstance().Log("This is an error", LogLevel.ERROR);
+
+        CreateMenu();
+
         P1 = GE.P1;
         P2 = GE.P2;
         TileFactory tf = new();
