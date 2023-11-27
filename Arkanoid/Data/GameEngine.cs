@@ -73,18 +73,14 @@ namespace Arkanoid.Data
             else Ball.InvertX();
         }
 
-        public void ConnectToHub(HubConnection hubConnection)
+        public void ConnectToHub(NavigationManager navigationManager)
         {
-            if (this.hubConnection is null)
+            if (hubConnection is null)
             {
-                this.hubConnection = hubConnection;
-
-                hubConnection.On<BounceDir>("ReceiveInvertBall", (dir) =>
-                {
-                    if (dir == BounceDir.Vertical)
-                        Ball.InvertY();
-                    else Ball.InvertX();
-                });
+                hubConnection = new HubConnectionBuilder()
+                    .WithUrl(navigationManager.ToAbsoluteUri("/gamehub"))
+                    .Build();
+                hubConnection.StartAsync();
             }
         }
 

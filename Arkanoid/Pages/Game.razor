@@ -97,7 +97,7 @@
             GE.LoadLevel(1);
         }
 
-        GE.ConnectToHub(hubConnection);
+        GE.ConnectToHub(Navigation);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
             if (tag == "ball")
