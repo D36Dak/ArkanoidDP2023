@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using Arkanoid.Data.PowerUps;
 @using Arkanoid.Data.Command;
 @using Arkanoid.Data.Tiles;
 @using Arkanoid.Data.Tiles.Decorator;
@@ -7,6 +8,7 @@
 @using Arkanoid.Data
 @using System.Numerics;
 @using Arkanoid.Data.Strategy;
+@using Arkanoid.Data.Logger;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
@@ -40,6 +42,13 @@
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
         }
+        @if (GE.visiblePowerUps is not null)
+        {
+            @foreach (var pu in GE.visiblePowerUps)
+            {
+                <div style="background: @(pu.Color); width: @(pu.Size)px; height: @(pu.Size)px; position: absolute; top: @(pu.Y)px; left: @(pu.X)px;"></div>
+            }
+        }
     }
 </div>
 <button @onclick="TEST">TEST</button>
@@ -63,6 +72,9 @@
     protected override async Task OnInitializedAsync()
     {
         GE = GameEngine.GetInstance();
+        LoggerSingleton.GetInstance().Log("This is printing information", LogLevel.INFO);
+        LoggerSingleton.GetInstance().Log("This is a warning", LogLevel.WARN);
+        LoggerSingleton.GetInstance().Log("This is an error", LogLevel.ERROR);
         P1 = GE.P1;
         P2 = GE.P2;
         TileFactory tf = new();
@@ -97,6 +109,7 @@
                 tm.tiles.Add(tile);
             }
             GE.tm = tm;
+            GE.LoadLevel(1);
         }
 
         GE.ConnectToHub(hubConnection);
@@ -239,21 +252,21 @@
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new RegularBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Regular));
         }
     }
     private void FastBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new FastBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Fast));
         }
     }
     private void TeleportingBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new TeleportSideStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Teleport));
         }
     }
     private void LoadLevel()

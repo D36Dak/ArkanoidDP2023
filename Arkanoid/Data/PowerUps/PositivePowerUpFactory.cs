@@ -1,7 +1,10 @@
 ﻿namespace Arkanoid.Data.PowerUps
 {
-    public class PositivePowerUpFactory: PowerUpFactory
+    public class PositivePowerUpFactory : PowerUpFactory
     {
+        PowerUpDirector director = new PowerUpDirector();
+        IPowerUpBuilder positiveBuilder = new PositivePowerUpBuilder();
+
         public PositivePowerUpFactory()
         {
             base.PowerUpTypes.Add("expand");
@@ -20,7 +23,7 @@
                 default:
                     break;
             }
-            throw new ArgumentException(string.Format("{0} is not a valid powerup type",type));
+            throw new ArgumentException(string.Format("{0} is not a valid powerup type", type));
         }
     }
 }

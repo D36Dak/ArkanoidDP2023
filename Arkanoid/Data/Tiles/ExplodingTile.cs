@@ -1,12 +1,11 @@
 ﻿using Arkanoid.Data.Tiles.Decorator;
-using System.Drawing;
 using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
 {
-    public class RegularTile : Tile
+    public class ExplodingTile : Tile
     {
-        public RegularTile(Ball ball, string color, Vector2 position, int hp = 1) : base(ball, color, position, hp)
+        public ExplodingTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
         {
         }
 
@@ -16,15 +15,20 @@ namespace Arkanoid.Data.Tiles
             GameEngine.GetInstance().InvertBallDirection(bounceDir);
         }
 
-        public override bool NeedReduceHP(Component tile, Ball ball) => true;
-        public override bool NeedDestroy(Component tile, Ball ball) => tile.HP <= 0;
-        public override void ReduceHP(Component tile, Ball ball)
+        public override bool NeedDestroy(Component tile, Ball ball)
         {
-            tile.HP = Math.Max(tile.HP - 1, 0);
+            return true;
         }
+
         public override void Destroy(Component tile, Ball ball)
         {
-            GameEngine.GetInstance().tm?.DestroyTile(tile);
+            var GE = GameEngine.GetInstance();
+            var tilesInRadius = GE.GetTilesInRadius(tile, 420);
+            foreach(var t in tilesInRadius)
+            {
+                GE.tm.DestroyTile(t);
+            }
+            GE.tm?.DestroyTile(tile);
         }
 
         public override Component Clone()
@@ -41,10 +45,8 @@ namespace Arkanoid.Data.Tiles
 
             // Create new instances of any internal reference types or deep clone them
             newTile.Ball = new Ball(new GameWindow());
-            // Example of cloning a string (if needed)
             newTile.Color = string.Copy(this.Color);
             newTile.Position = new Vector2(this.Position.X, this.Position.Y);
-            newTile.HP = this.HP;
 
             return newTile;
         }

@@ -2,6 +2,8 @@
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Timers;
+using Arkanoid.Data.Adapter;
+using Arkanoid.Data.PowerUps;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Data.Tiles.Decorator;
@@ -24,15 +26,32 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
+        private List<IMovable> movables;
+        public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         private GameEngine()
         {
+            movables = new List<IMovable>();
             Ball = new Ball(Window);
+            movables.Add(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
             ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
         }
+
+        public List<Component> GetTilesInRadius(Component tile, int radius)
+        {
+            var tilesInRadius = new List<Component>();
+            if(tm == null) return tilesInRadius;
+            foreach(var t in tm.tiles)
+            {
+                var dist = Vector2.Distance(t.Position, tile.Position);
+                if(dist <= radius) tilesInRadius.Add(t);
+            }
+            return tilesInRadius;
+        }
+
         public static GameEngine GetInstance()
         {
             lock (ThreadLock)
@@ -79,7 +98,11 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            Ball.Update();
+            foreach (var movable in movables)
+            {
+                movable.Move();
+            }
+            //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
             Send();
         }
@@ -133,8 +156,20 @@ namespace Arkanoid.Data
                     {
                         var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
                         Component tile = tf.CreateTile(TileType.Regular, pos);
+                        if (i == 0)
+                        {
+                            tile = new DropPowerUp(tile);
+                        }
+
                         for (var j = 1; j < 10; j++)
                         {
+                            Vector2 newPos = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
+                            if (i == 2 && j == 4)
+                            {
+                                Component explosive = tf.CreateTile(TileType.Explosive, newPos);
+                                tm.tiles.Add(explosive);
+                                continue;
+                            }
                             // Shallow copy
                             Component clonedTile = tile.Clone();
                             clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
@@ -144,11 +179,16 @@ namespace Arkanoid.Data
                             //Component deepClonedTile = tile.DeepCopy();
                             //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             //tm.tiles.Add(deepClonedTile);
+
+                            
                         }
                         tm.tiles.Add(tile);
                     }
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     SetBallMovementStrategy(new RegularBallStrategy());
+                    visiblePowerUps = new List<PowerUp>();
+                    movables = new List<IMovable>();
+                    movables.Add(Ball);
                     break;
                 default: break;
             }
@@ -189,6 +229,18 @@ namespace Arkanoid.Data
         public void SetBallMovementStrategy(BallMoveAlgorithm strategy)
         {
             this.Ball.MoveAlgorithm = strategy;
+        }
+        public void AddVisiblePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Add(powerUp);
+            MoveAdapter adapter = new MoveAdapter(powerUp);
+            this.movables.Add(adapter);
+        }
+        public void RemovePowerUp(PowerUp powerUp)
+        {
+            this.visiblePowerUps.Remove(powerUp);
+            var toRemove = movables.OfType<MoveAdapter>().ToList();
+            toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
         }
     }
 }
