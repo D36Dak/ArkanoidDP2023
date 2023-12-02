@@ -174,12 +174,14 @@
         {
             case "a":
                 //myPlayer.MoveRight();
-                command = new LeftCommand(myPlayer);
+                //command = new LeftCommand(myPlayer);
+                command = new LeftMoveProxy(myPlayer);
                 //await SendPaddlePosition(myPlayer);
                 break;
             case "d":
                 //myPlayer.MoveLeft();
-                command = new RightCommand(myPlayer);
+                //command = new RightCommand(myPlayer);
+                command = new RightMoveProxy(myPlayer);
                 //await SendPaddlePosition(myPlayer);
                 break;
             case "x":
