@@ -37,6 +37,15 @@ namespace Arkanoid.Data
             SpeedX = 0;
             SpeedY = 0;
         }
+        public Ball(GameWindow gameWindow, BallMoveAlgorithm moveAlgorithm)
+        {
+            MoveAlgorithm = moveAlgorithm;
+            X = 0;
+            Y = 0;
+            GameWindow = gameWindow;
+            SpeedX = 0;
+            SpeedY = 0;
+        }
         
         /// <summary>
         /// Sets ball speed. Recommended to use values adding up to 6.

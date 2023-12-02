@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Arkanoid.Data.PowerUps;
 
 namespace Arkanoid.Data.Tiles.Decorator
 {
@@ -10,6 +11,24 @@ namespace Arkanoid.Data.Tiles.Decorator
 
         public override void OnHit(Component tile, Ball ball)
         {
+            base.OnHit(tile, ball);
+            if (this.HP < 1)
+            {
+                PowerUpFactory puf;
+                Random rng = new Random();
+                if (rng.Next(2) < 1)
+                {
+                    puf = PowerUpManager.getPUF(PUFTypes.Positive);
+                }
+                else
+                {
+                    puf = PowerUpManager.getPUF(PUFTypes.Negative);
+                }
+                PowerUp pu = puf.CreatePowerUp(puf.PowerUpTypes[rng.Next(puf.PowerUpTypes.Count)], (int)tile.Position.X, (int)tile.Position.Y);
+                GameEngine GE = GameEngine.GetInstance();
+                GE.AddVisiblePowerUp(pu);
+            }
+            
             // instantiate power up and add it to dropping list or something...
         }
 

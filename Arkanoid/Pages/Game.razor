@@ -1,4 +1,5 @@
 ﻿@page "/game"
+@using Arkanoid.Data.PowerUps;
 @using Arkanoid.Data.Command;
 @using Arkanoid.Data.Tiles;
 @using Arkanoid.Data.Tiles.Decorator;
@@ -7,14 +8,16 @@
 @using Arkanoid.Data
 @using System.Numerics;
 @using Arkanoid.Data.Strategy;
+@using Arkanoid.Data.Logger;
+@using Arkanoid.Data.State;
 @inject NavigationManager Navigation
 @implements IAsyncDisposable
 
 <PageTitle>Game</PageTitle>
 
 <h1>Game view</h1>
-<button class="btn btn-primary" disabled="@(!canStart)" @onclick="GE.StartTimer">Start</button>
-<button class="btn btn-primary" @onclick="GE.StopTimer">Stop</button>
+<button class="btn btn-primary" disabled="@(!canStart)" @onclick="Start">Start</button>
+<button class="btn btn-primary" @onclick="Stop">Stop</button>
 <button class="btn btn-primary" @onclick="GE.ResetBallPosition">Reset</button>
 <button class="btn btn-primary" @onclick="Subscribe">Join game</button>
 <div>
@@ -25,6 +28,10 @@
 <h1 class="text-primary">Level select</h1>
 <div>
     <button class="btn btn-primary" @onclick="LoadLevel">LEVEL 1</button>
+</div>
+<div>
+    <p>HP: @GE.HP</p>
+    <p>Game state: @GE.gameState.GetMessage()</p>
 </div>
 
 @* <div style="top: @(top)px; left: @(left)px; position: relative">test</div> *@
@@ -39,6 +46,13 @@
         @foreach (var tile in GE.tm.tiles.ToList())
         {
             <div style="background: @(tile.Color); width: @(tile.Width)px; height: @(tile.Height)px; position: absolute; top: @(tile.Position.Y)px; left: @(tile.Position.X)px;"></div>
+        }
+        @if (GE.visiblePowerUps is not null)
+        {
+            @foreach (var pu in GE.visiblePowerUps)
+            {
+                <div style="background: @(pu.Color); width: @(pu.Size)px; height: @(pu.Size)px; position: absolute; top: @(pu.Y)px; left: @(pu.X)px;"></div>
+            }
         }
     }
 </div>
@@ -63,6 +77,9 @@
     protected override async Task OnInitializedAsync()
     {
         GE = GameEngine.GetInstance();
+        LoggerSingleton.GetInstance().Log("This is printing information", LogLevel.INFO);
+        LoggerSingleton.GetInstance().Log("This is a warning", LogLevel.WARN);
+        LoggerSingleton.GetInstance().Log("This is an error", LogLevel.ERROR);
         P1 = GE.P1;
         P2 = GE.P2;
         TileFactory tf = new();
@@ -77,29 +94,10 @@
         .Build();
         if (GE.tm is null)
         {
-            TileManager tm = new TileManager();
-            for (var i = 0; i < 3; i++)
-            {
-                var pos = new Vector2(offset.X, offset.Y + i * (height + gap.Y));
-                Component tile = tf.CreateTile(TileType.Regular, pos);
-                for (var j = 1; j < 10; j++)
-                {
-                    // Shallow  copy
-                    Component clonedTile = tile.Clone();
-                    clonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    tm.tiles.Add(clonedTile);
-
-                    //Deep copy
-                    // Component deepClonedTile = tile.DeepCopy();
-                    // deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
-                    // tm.tiles.Add(deepClonedTile);
-                }
-                tm.tiles.Add(tile);
-            }
-            GE.tm = tm;
+            GE.LoadLevel(1);
         }
 
-        GE.ConnectToHub(hubConnection);
+        GE.ConnectToHub(Navigation);
         hubConnection.On<int, int, string>("ReceivePosition", (x, y, tag) =>
         {
             if (tag == "ball")
@@ -193,7 +191,7 @@
             case "w":
                 if (GE is not null)
                 {
-                    await GE.StartTimer();
+                    GE.SetState(new RunningState());
                 }
                 break;
             default:
@@ -241,26 +239,34 @@
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new RegularBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Regular));
         }
     }
     private void FastBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new FastBallStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Fast));
         }
     }
     private void TeleportingBall()
     {
         if (GE is not null)
         {
-            GE.SetBallMovementStrategy(new TeleportSideStrategy());
+            GE.SetBallMovementStrategy(StrategyFactory.GetStrategy(Strategies.Teleport));
         }
     }
     private void LoadLevel()
     {
         GE.LoadLevel(1);
+    }
+    private void Stop()
+    {
+        GE.SetState(new PausedState());
+    }
+    private void Start()
+    {
+        GE.SetState(new RunningState());
     }
     //----------------------------------------
 }

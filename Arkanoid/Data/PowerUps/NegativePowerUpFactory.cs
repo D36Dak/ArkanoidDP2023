@@ -2,6 +2,9 @@
 {
     public class NegativePowerUpFactory : PowerUpFactory
     {
+        PowerUpDirector director = new PowerUpDirector();
+        IPowerUpBuilder negativeBuilder = new NegativePowerUpBuilder();
+
         public NegativePowerUpFactory()
         {
             base.PowerUpTypes.Add("shrink");
@@ -22,6 +25,5 @@
             }
             throw new ArgumentException(string.Format("{0} is not a valid powerup type", type));
         }
-
     }
 }

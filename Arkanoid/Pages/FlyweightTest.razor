@@ -1,0 +1,33 @@
+﻿@page "/fwtest"
+@using Arkanoid.Data
+@using Arkanoid.Data.Strategy;
+@using System.Diagnostics;
+<h3>FlyweightTest</h3>
+<button class="btn btn-primary" @onclick="RunFW">Run with flyweight</button>
+<button class="btn btn-primary" @onclick="RunNO">Run without flyweight</button>
+
+@code {
+    private List<Ball> balls = new List<Ball>();
+    public void RunFW()
+    {
+        balls = new List<Ball>();
+        var memoryBefore = GC.GetTotalMemory(true) / (1024*1024);
+        for (int i = 0; i < 1000000; i++)
+        {
+            balls.Add(new Ball(new GameWindow(), StrategyFactory.GetStrategy(Strategies.Regular)));
+        }
+        var memoryAfter = GC.GetTotalMemory(true) / (1024 * 1024);
+        Console.WriteLine($"Memory used with flyweight: {memoryAfter - memoryBefore} MB");
+    }
+    public void RunNO()
+    {
+        balls = new List<Ball>();
+        var memoryBefore = GC.GetTotalMemory(true) / (1024 * 1024);
+        for (int i = 0; i < 1000000; i++)
+        {
+            balls.Add(new Ball(new GameWindow()));
+        }
+        var memoryAfter = GC.GetTotalMemory(true) / (1024 * 1024);
+        Console.WriteLine($"Memory used without flyweight: {memoryAfter - memoryBefore} MB");
+    }
+}
