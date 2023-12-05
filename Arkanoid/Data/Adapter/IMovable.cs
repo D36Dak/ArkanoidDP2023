@@ -3,5 +3,6 @@
     public interface IMovable
     {
         public void Move();
+        int GetPositionY();
     }
 }

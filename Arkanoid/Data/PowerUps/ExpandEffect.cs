@@ -27,6 +27,7 @@
 
         public void RemoveEffect(PowerUp implementor)
         {
+
             // revert the paddle to original size
             paddle.SetX(paddle.GetX() + (int)(originalWidth * 0.25)); // Revert the X position
             paddle.SetWidth(originalWidth);
