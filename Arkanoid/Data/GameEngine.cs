@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using Arkanoid.Data.Adapter;
 using Arkanoid.Data.PowerUps;
+using Arkanoid.Data.State;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Data.Tiles.Decorator;
@@ -28,6 +29,8 @@ namespace Arkanoid.Data
         private static object ThreadLock = new();
         private List<IMovable> movables;
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
+        public int HP { get; private set; }
+        public IGameState gameState { get; private set; }
         private GameEngine()
         {
             movables = new List<IMovable>();
@@ -38,6 +41,8 @@ namespace Arkanoid.Data
             ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
+            HP = 3;
+            gameState = new PausedState();
         }
 
         public List<Component> GetTilesInRadius(Component tile, int radius)
@@ -68,18 +73,14 @@ namespace Arkanoid.Data
             else Ball.InvertX();
         }
 
-        public void ConnectToHub(HubConnection hubConnection)
+        public void ConnectToHub(NavigationManager navigationManager)
         {
-            if (this.hubConnection is null)
+            if (hubConnection is null)
             {
-                this.hubConnection = hubConnection;
-
-                hubConnection.On<BounceDir>("ReceiveInvertBall", (dir) =>
-                {
-                    if (dir == BounceDir.Vertical)
-                        Ball.InvertY();
-                    else Ball.InvertX();
-                });
+                hubConnection = new HubConnectionBuilder()
+                    .WithUrl(navigationManager.ToAbsoluteUri("/gamehub"))
+                    .Build();
+                hubConnection.StartAsync();
             }
         }
 
@@ -102,10 +103,20 @@ namespace Arkanoid.Data
             {
                 movable.Move();
             }
+            CheckHPLoss();
             //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
             Send();
         }
+
+        private void CheckHPLoss()
+        {
+            if (this.Ball.GetY()>GetWindowHeight()-40)
+            {
+                SetState(new LifeLostState());
+            }
+        }
+
         private async Task Send()
         {
             if (hubConnection is not null)
@@ -189,9 +200,11 @@ namespace Arkanoid.Data
                     visiblePowerUps = new List<PowerUp>();
                     movables = new List<IMovable>();
                     movables.Add(Ball);
+                    this.HP = 3;
                     break;
                 default: break;
             }
+            SetState(new PausedState());
             _ = Send();
         }
         public async Task SetBallPosition(int x, int y)
@@ -241,6 +254,20 @@ namespace Arkanoid.Data
             this.visiblePowerUps.Remove(powerUp);
             var toRemove = movables.OfType<MoveAdapter>().ToList();
             toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
+        }
+        public void LoseLife()
+        {
+            this.HP--;
+            HP = Math.Max(0, this.HP);
+        }
+        public void SetState(IGameState state)
+        {
+            if (HP == 0 && state is RunningState)
+            {
+                return;
+            }
+            this.gameState = state;
+            this.gameState.Action();
         }
     }
 }

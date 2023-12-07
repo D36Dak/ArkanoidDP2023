@@ -1,4 +1,5 @@
-﻿using Arkanoid.Data.Tiles.Decorator;
+﻿using Arkanoid.Data.State;
+using Arkanoid.Data.Tiles.Decorator;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Arkanoid.Data.Tiles
@@ -18,6 +19,7 @@ namespace Arkanoid.Data.Tiles
                 {
                     Console.WriteLine("Removed tile " + tile.Position.X + ", " + tile.Position.Y);
                     tiles.Remove(comp);
+                    CheckWin();
                 }
             }
         }
@@ -25,8 +27,16 @@ namespace Arkanoid.Data.Tiles
         {
             GameEngine.GetInstance().RemoveTileFromCollisions(tile);
             RemoveTile(tile);
+
             //await Connection.SendAsync("RemoveTile", tile.Position.X, tile.Position.Y, Connection.ConnectionId);
         }
-
+        private void CheckWin()
+        {
+            if (!tiles.Any())
+            {
+                GameEngine ge = GameEngine.GetInstance();
+                ge.SetState(new WonState());
+            }
+        }
     }
 }
