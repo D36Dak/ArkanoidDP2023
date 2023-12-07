@@ -20,6 +20,10 @@ namespace Arkanoid.Data
         private static GameEngine? Instance = null;
         private HubConnection? hubConnection;
         private GameWindow Window = new();
+        private PaddleCaretaker paddle1Caretaker = new PaddleCaretaker(); // Create PaddleCaretaker
+        private PaddleCaretaker paddle2Caretaker = new PaddleCaretaker(); // Create PaddleCaretaker
+        public List<int> Paddle1DefaultStates { get; private set; } = new List<int>(); // List to store default X values for Paddle 1
+        public List<int> Paddle2DefaultStates { get; private set; } = new List<int>(); // List to store default X values for Paddle 2
         public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
@@ -38,6 +42,8 @@ namespace Arkanoid.Data
             movables.Add(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            paddle1Caretaker.Memento = CreatePaddle1DefaultX();
+            paddle2Caretaker.Memento = CreatePaddle2DefaultX();
             ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
@@ -268,6 +274,28 @@ namespace Arkanoid.Data
             }
             this.gameState = state;
             this.gameState.Action();
+        }
+
+        public Memento CreatePaddle1DefaultX()
+        {
+            List<int> defaultXState = new List<int> { 200 };
+            return new Memento(defaultXState); // Store this initial state as the default for Paddle 1
+        }
+
+        public Memento CreatePaddle2DefaultX()
+        {
+            List<int> defaultXState = new List<int> { 840 };
+            return new Memento(defaultXState); // Store this initial state as the default for Paddle 2
+        }
+
+        public Memento GetPaddle1DefaultX()
+        {
+            return paddle1Caretaker.Memento;
+        }
+
+        public Memento GetPaddle2DefaultX()
+        {
+            return paddle2Caretaker.Memento;
         }
     }
 }
