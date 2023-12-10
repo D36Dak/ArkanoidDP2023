@@ -105,10 +105,15 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach(var movable in movableManager.GetMovables())
+            MovableIterator iterator = movableManager.CreateIterator();
+            for (var element = iterator.First(); !iterator.IsDone(); element = iterator.Next())
             {
-                movable.Move();
+                ((IMovable)element).Move();
             }
+            //foreach(var movable in movableManager.GetMovables())
+            //{
+            //    movable.Move();
+            //}
             
             //foreach (var movable in movables)
             //{
