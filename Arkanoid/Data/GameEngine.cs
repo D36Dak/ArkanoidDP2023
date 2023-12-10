@@ -31,15 +31,15 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
-        private List<IMovable> movables;
+        public MovableManager movableManager = new();
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
         public IGameState gameState { get; private set; }
         private GameEngine()
         {
-            movables = new List<IMovable>();
+            
             Ball = new Ball(Window);
-            movables.Add(Ball);
+            movableManager.AddMovable(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
             paddle1Caretaker.Memento = CreatePaddle1DefaultX();
@@ -105,10 +105,15 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach (var movable in movables)
+            foreach(var movable in movableManager.GetMovables())
             {
                 movable.Move();
             }
+            
+            //foreach (var movable in movables)
+            //{
+            //    movable.Move();
+            //}
             CheckHPLoss();
             //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
@@ -204,8 +209,10 @@ namespace Arkanoid.Data
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     SetBallMovementStrategy(new RegularBallStrategy());
                     visiblePowerUps = new List<PowerUp>();
-                    movables = new List<IMovable>();
-                    movables.Add(Ball);
+                    //movables = new List<IMovable>();
+                    //movables.Add(Ball);
+                    movableManager = new MovableManager();
+                    movableManager.AddMovable(Ball);
                     this.HP = 3;
                     break;
                 default: break;
@@ -253,13 +260,16 @@ namespace Arkanoid.Data
         {
             this.visiblePowerUps.Add(powerUp);
             MoveAdapter adapter = new MoveAdapter(powerUp);
-            this.movables.Add(adapter);
+            this.movableManager.AddMovable(adapter);
         }
         public void RemovePowerUp(PowerUp powerUp)
         {
             this.visiblePowerUps.Remove(powerUp);
-            var toRemove = movables.OfType<MoveAdapter>().ToList();
-            toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
+            var toRemove = movableManager.GetMovables().OfType<MoveAdapter>().Where(m => m.Adaptee.Equals(powerUp)).ToList();
+            foreach (var removable in toRemove)
+            {
+                movableManager.RemoveMovable(removable);
+            }
         }
         public void LoseLife()
         {
