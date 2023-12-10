@@ -13,6 +13,8 @@ namespace Arkanoid.Data
             _movableManager = movableManager;
         }
 
+      
+
         public override object First()
         {
             

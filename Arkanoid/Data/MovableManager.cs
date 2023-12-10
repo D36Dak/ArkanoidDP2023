@@ -23,7 +23,10 @@ namespace Arkanoid.Data
         {
             movables.Remove(movable);
         }
-
+        public PositionIterator CreatePositionIterator()
+        {
+            return new PositionIterator(this);
+        }
         public IMovable this[int index]
         {
             get => movables[index];

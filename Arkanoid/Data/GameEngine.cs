@@ -32,12 +32,16 @@ namespace Arkanoid.Data
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
         public MovableManager movableManager = new();
+        
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
         public IGameState gameState { get; private set; }
+
+       
+
         private GameEngine()
         {
-            
+
             Ball = new Ball(Window);
             movableManager.AddMovable(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
@@ -54,11 +58,11 @@ namespace Arkanoid.Data
         public List<Component> GetTilesInRadius(Component tile, int radius)
         {
             var tilesInRadius = new List<Component>();
-            if(tm == null) return tilesInRadius;
-            foreach(var t in tm.tiles)
+            if (tm == null) return tilesInRadius;
+            foreach (var t in tm.tiles)
             {
                 var dist = Vector2.Distance(t.Position, tile.Position);
-                if(dist <= radius) tilesInRadius.Add(t);
+                if (dist <= radius) tilesInRadius.Add(t);
             }
             return tilesInRadius;
         }
@@ -105,11 +109,13 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach(var movable in movableManager.GetMovables())
+            MovableIterator iterator = movableManager.CreateIterator();
+
+            for (var element = iterator.First(); !iterator.IsDone(); element = iterator.Next())
             {
-                movable.Move();
+                ((IMovable)element).Move();
             }
-            
+
             //foreach (var movable in movables)
             //{
             //    movable.Move();
@@ -122,7 +128,7 @@ namespace Arkanoid.Data
 
         private void CheckHPLoss()
         {
-            if (this.Ball.GetY()>GetWindowHeight()-40)
+            if (this.Ball.GetY() > GetWindowHeight() - 40)
             {
                 SetState(new LifeLostState());
             }
@@ -163,7 +169,7 @@ namespace Arkanoid.Data
         {
             _ = StopTimer();
             tm ??= new TileManager();
-            while (tm.tiles.Count>0)
+            while (tm.tiles.Count > 0)
             {
                 _ = tm.DestroyTile(tm.tiles[0]);
             }
@@ -202,7 +208,7 @@ namespace Arkanoid.Data
                             //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             //tm.tiles.Add(deepClonedTile);
 
-                            
+
                         }
                         tm.tiles.Add(tile);
                     }
@@ -307,5 +313,6 @@ namespace Arkanoid.Data
         {
             return paddle2Caretaker.Memento;
         }
+        
     }
-}
+    }
