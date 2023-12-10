@@ -110,7 +110,6 @@ namespace Arkanoid.Data
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
             MovableIterator iterator = movableManager.CreateIterator();
-
             for (var element = iterator.First(); !iterator.IsDone(); element = iterator.Next())
             {
                 ((IMovable)element).Move();
