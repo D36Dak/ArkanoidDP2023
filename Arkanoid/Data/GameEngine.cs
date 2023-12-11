@@ -269,5 +269,15 @@ namespace Arkanoid.Data
             this.gameState = state;
             this.gameState.Action();
         }
+
+        public void CheatsSetHP(int hp)
+        {
+            this.HP = hp;
+        }
+        public void CheatsSetSize(int size)
+        {
+            this.P1.SetWidth(size);
+            this.P2.SetWidth(size);
+        }
     }
 }

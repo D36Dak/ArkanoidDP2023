@@ -3,6 +3,7 @@
     public class ChatMediator : IMediator
     {
         private List<User> users = new List<User>();
+        private ChatInterpreter interpreter = new ChatInterpreter();
         private static ChatMediator instance;
         public void AddUser(User user)
         {
@@ -13,6 +14,8 @@
         {
             if (sender is Player)
             {
+                interpreter.ParseMessage(message);
+                message = interpreter.Interpret();
                 foreach (var user in users)
                 {
                     user.ReceiveMessage(message);
