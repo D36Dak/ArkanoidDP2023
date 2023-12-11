@@ -6,7 +6,7 @@ using System.Security.Cryptography.Xml;
 
 namespace Arkanoid.Data
 {
-    public class Ball : ISubject, IMovable
+    public class Ball : ISubject, IMovable 
     {
         private int X;
         private int Y;
@@ -137,6 +137,11 @@ namespace Arkanoid.Data
             {
                 observer.Update();
             }
+        }
+
+        public int GetPositionY()
+        {
+            return Y;
         }
     }
 }

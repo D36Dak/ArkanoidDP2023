@@ -10,6 +10,7 @@
         public Side side { get; set; }
         public string color = "blue";
         protected Ball Ball { get; set; }
+        private List<int> defaultXValues = new List<int>(); // List to store default X values
 
         public Paddle(int x, string id, Side side, Ball ball)
         {
@@ -18,6 +19,7 @@
             this.side = side;
             Ball = ball;
             ball.Attach(this);
+            defaultXValues.Add(x);
         }
 
         /// <summary>
@@ -80,7 +82,25 @@
                 }
             }
         }
-        
+
+        public void SetMemento(Memento memento)
+        {
+            if (memento != null)
+            {
+                List<int> states = memento.GetState();
+                if (states.Count > 0)
+                {
+                    X = states[0]; // Set the paddle's X position to the stored state
+                }
+            }
+        }
+
+        public Memento CreateMemento()
+        {
+            List<int> defaultXValuesCopy = new List<int>(defaultXValues); // Copy the default X values
+            return new Memento(defaultXValuesCopy); // Create a memento with the default X values
+        }
+
         public void SetWidth(int width)
         {
             Width = width;

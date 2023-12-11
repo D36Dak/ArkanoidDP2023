@@ -20,6 +20,10 @@ namespace Arkanoid.Data
         private static GameEngine? Instance = null;
         private HubConnection? hubConnection;
         private GameWindow Window = new();
+        private PaddleCaretaker paddle1Caretaker = new PaddleCaretaker(); // Create PaddleCaretaker
+        private PaddleCaretaker paddle2Caretaker = new PaddleCaretaker(); // Create PaddleCaretaker
+        public List<int> Paddle1DefaultStates { get; private set; } = new List<int>(); // List to store default X values for Paddle 1
+        public List<int> Paddle2DefaultStates { get; private set; } = new List<int>(); // List to store default X values for Paddle 2
         public Ball Ball { get; private set; }
         public Paddle P1;
         public Paddle P2;
@@ -27,17 +31,23 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
-        private List<IMovable> movables;
+        public MovableManager movableManager = new();
+        
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
         public IGameState gameState { get; private set; }
+
+       
+
         private GameEngine()
         {
-            movables = new List<IMovable>();
+
             Ball = new Ball(Window);
-            movables.Add(Ball);
+            movableManager.AddMovable(Ball);
             P1 = new Paddle(200, "", Side.LEFT, Ball);
             P2 = new Paddle(840, "", Side.RIGHT, Ball);
+            paddle1Caretaker.Memento = CreatePaddle1DefaultX();
+            paddle2Caretaker.Memento = CreatePaddle2DefaultX();
             ResetBallPosition();
             SetSpeed(3, 3);
             SetupTimer();
@@ -48,11 +58,11 @@ namespace Arkanoid.Data
         public List<Component> GetTilesInRadius(Component tile, int radius)
         {
             var tilesInRadius = new List<Component>();
-            if(tm == null) return tilesInRadius;
-            foreach(var t in tm.tiles)
+            if (tm == null) return tilesInRadius;
+            foreach (var t in tm.tiles)
             {
                 var dist = Vector2.Distance(t.Position, tile.Position);
-                if(dist <= radius) tilesInRadius.Add(t);
+                if (dist <= radius) tilesInRadius.Add(t);
             }
             return tilesInRadius;
         }
@@ -99,10 +109,16 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach (var movable in movables)
+            MovableIterator iterator = movableManager.CreateIterator();
+            for (var element = iterator.First(); !iterator.IsDone(); element = iterator.Next())
             {
-                movable.Move();
+                ((IMovable)element).Move();
             }
+
+            //foreach (var movable in movables)
+            //{
+            //    movable.Move();
+            //}
             CheckHPLoss();
             //Ball.Update();
             //Console.WriteLine(String.Format("Ball pos: {0} : {1}", Ball.GetX(), Ball.GetY()));
@@ -111,7 +127,7 @@ namespace Arkanoid.Data
 
         private void CheckHPLoss()
         {
-            if (this.Ball.GetY()>GetWindowHeight()-40)
+            if (this.Ball.GetY() > GetWindowHeight() - 40)
             {
                 SetState(new LifeLostState());
             }
@@ -152,7 +168,7 @@ namespace Arkanoid.Data
         {
             _ = StopTimer();
             tm ??= new TileManager();
-            while (tm.tiles.Count>0)
+            while (tm.tiles.Count > 0)
             {
                 _ = tm.DestroyTile(tm.tiles[0]);
             }
@@ -191,15 +207,17 @@ namespace Arkanoid.Data
                             //deepClonedTile.Position = new Vector2(offset.X + j * (width + gap.X), offset.Y + i * (height + gap.Y));
                             //tm.tiles.Add(deepClonedTile);
 
-                            
+
                         }
                         tm.tiles.Add(tile);
                     }
                     Ball.SetPosition(P1.GetX() + P1.GetWidth() / 2, P1.GetY() - Ball.GetSize());
                     SetBallMovementStrategy(new RegularBallStrategy());
                     visiblePowerUps = new List<PowerUp>();
-                    movables = new List<IMovable>();
-                    movables.Add(Ball);
+                    //movables = new List<IMovable>();
+                    //movables.Add(Ball);
+                    movableManager = new MovableManager();
+                    movableManager.AddMovable(Ball);
                     this.HP = 3;
                     break;
                 default: break;
@@ -247,13 +265,16 @@ namespace Arkanoid.Data
         {
             this.visiblePowerUps.Add(powerUp);
             MoveAdapter adapter = new MoveAdapter(powerUp);
-            this.movables.Add(adapter);
+            this.movableManager.AddMovable(adapter);
         }
         public void RemovePowerUp(PowerUp powerUp)
         {
             this.visiblePowerUps.Remove(powerUp);
-            var toRemove = movables.OfType<MoveAdapter>().ToList();
-            toRemove.RemoveAll(i=>i.Adaptee.Equals(powerUp));
+            var toRemove = movableManager.GetMovables().OfType<MoveAdapter>().Where(m => m.Adaptee.Equals(powerUp)).ToList();
+            foreach (var removable in toRemove)
+            {
+                movableManager.RemoveMovable(removable);
+            }
         }
         public void LoseLife()
         {
@@ -279,5 +300,26 @@ namespace Arkanoid.Data
             this.P1.SetWidth(size);
             this.P2.SetWidth(size);
         }
+        public Memento CreatePaddle1DefaultX()
+        {
+            List<int> defaultXState = new List<int> { 200 };
+            return new Memento(defaultXState); // Store this initial state as the default for Paddle 1
+        }
+
+        public Memento CreatePaddle2DefaultX()
+        {
+            List<int> defaultXState = new List<int> { 840 };
+            return new Memento(defaultXState); // Store this initial state as the default for Paddle 2
+        }
+
+        public Memento GetPaddle1DefaultX()
+        {
+            return paddle1Caretaker.Memento;
+        }
+
+        public Memento GetPaddle2DefaultX()
+        {
+            return paddle2Caretaker.Memento;
+        }
     }
-}
+    }
