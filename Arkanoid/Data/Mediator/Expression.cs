@@ -4,6 +4,6 @@ namespace Arkanoid.Data.Mediator
 {
     public abstract class Expression
     {
-        public abstract void Interpret(string context);
+        public abstract void Interpret(StringBuilder context);
     }
 }

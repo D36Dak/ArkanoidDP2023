@@ -1,4 +1,6 @@
-﻿namespace Arkanoid.Data.Mediator
+﻿using System.Text;
+
+namespace Arkanoid.Data.Mediator
 {
     public class WordExpression:Expression
     {
@@ -8,9 +10,9 @@
             this.Word = word;
         }
 
-        public override void Interpret(string context)
+        public override void Interpret(StringBuilder context)
         {
-            context = context + Word + " ";
+            context.Append(Word + " ");
         }
     }
 }

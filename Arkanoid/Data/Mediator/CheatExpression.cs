@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Arkanoid.Data.Mediator
 {
@@ -12,7 +13,7 @@ namespace Arkanoid.Data.Mediator
             this.Right = right;
         }
 
-        public override void Interpret(string context)
+        public override void Interpret(StringBuilder context)
         {
             if (Left.Word.ToLower().Equals("give"))
             {
@@ -25,17 +26,19 @@ namespace Arkanoid.Data.Mediator
             }
         }
 
-        private void InterpretGive(string context)
+        private void InterpretGive(StringBuilder context)
         {
             if (Right.Word.ToLower().Equals("hp"))
             {
                 GiveHp();
-                context = "You got infinite HP";
+                context.Clear();
+                context.Append("You got infinite HP");
             }
             else if (Right.Word.ToLower().Equals("size"))
             {
                 GiveSize();
-                context = "You got infinite paddle width";
+                context.Clear();
+                context.Append("You got maximum paddle width");
             }
             else
             {
@@ -44,17 +47,19 @@ namespace Arkanoid.Data.Mediator
                 Right.Interpret(context);
             }
         }
-        private void InterpretTake(string context)
+        private void InterpretTake(StringBuilder context)
         {
             if (Right.Word.ToLower().Equals("hp"))
             {
                 TakeHp();
-                context = "HP got reset to normal";
+                context.Clear();
+                context.Append("HP got reset to normal");
             }
             else if (Right.Word.ToLower().Equals("size"))
             {
                 TakeSize();
-                context = "Paddle width got reset to normal";
+                context.Clear();
+                context.Append("Paddle width got reset to normal");
             }
             else
             {
@@ -83,7 +88,7 @@ namespace Arkanoid.Data.Mediator
         /// </summary>
         private void GiveSize()
         {
-            GameEngine.GetInstance().CheatsSetSize(800);
+            GameEngine.GetInstance().CheatsSetSize(600);
         }
         /// <summary>
         /// Takes away maximum width from paddles

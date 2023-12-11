@@ -1,4 +1,6 @@
-﻿namespace Arkanoid.Data.Mediator
+﻿using System.Text;
+
+namespace Arkanoid.Data.Mediator
 {
     public class ChatInterpreter
     {
@@ -17,15 +19,19 @@
                     WordExpression e1 = new WordExpression(words[i]);
                     WordExpression e2 = new WordExpression(words[i+1]);
                     expressions.Add(new CheatExpression(e1, e2));
+                    i++;
                 }
-                expressions.Add(new WordExpression(words[i]));
+                else
+                {
+                    expressions.Add(new WordExpression(words[i]));
+                }
             }
         }
         public string Interpret()
         {
-            string result = "";
+            StringBuilder result = new StringBuilder(50);
             foreach (var expression in expressions) { expression.Interpret(result); }
-            return result;
+            return result.ToString();
         }
     }
 }
