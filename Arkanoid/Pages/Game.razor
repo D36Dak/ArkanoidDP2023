@@ -63,9 +63,35 @@
     }
 </div>
 <button @onclick="TEST">TEST</button>
+<div class="form-group">
+    <label>
+        User:
+        <input @bind="me.name" />
+    </label>
+</div>
+<div class="form-group">
+    <label>
+        Message:
+        <input @bind="messageInput" size="50" />
+    </label>
+</div>
+<button @onclick="SendChatMessage" disabled="@(!ChatConnected)">Send</button>
+
+<hr>
+@if(me is not null)
+{
+    <ul id="messagesList">
+        @foreach (var message in me.messages)
+        {
+            <li>@message</li>
+        }
+    </ul>
+}
+
 <br />
 
 @code {
+    private User me = null;
     private GameEngine? GE = null;//GameEngine.GetInstance(navigation);
     private HubConnection? hubConnection;
     private Paddle P1;
@@ -74,6 +100,13 @@
     PaddleController controller = new PaddleController();
     bool canStart = true;
     public MarkupString? menuMarkup = null;
+    //---------------Chat---------------
+    private HubConnection? chathubConnection;
+    private List<string> messages = new List<string>();
+    private string? userInput;
+    private string? messageInput;
+    //----------------------------------
+
 
     public void TEST()
     {
@@ -105,19 +138,24 @@
                 "Ball strategies"
             )
         };
-        
+
         MenuComposite mcomp = new MenuComposite(menuItems, "Menu composite");
         menuMarkup = new MarkupString(mcomp.GetHTML());
     }
 
     protected override async Task OnInitializedAsync()
     {
+        me = new Spectator("");
         GE = GameEngine.GetInstance();
         LoggerSingleton.GetInstance().Log("This is printing information", LogLevel.INFO);
         LoggerSingleton.GetInstance().Log("This is a warning", LogLevel.WARN);
         LoggerSingleton.GetInstance().Log("This is an error", LogLevel.ERROR);
 
         CreateMenu();
+
+        chathubConnection = new HubConnectionBuilder()
+        .WithUrl(Navigation.ToAbsoluteUri("/chatHub"))
+        .Build();
 
         P1 = GE.P1;
         P2 = GE.P2;
@@ -201,6 +239,7 @@
                 myPlayer = p;
                 myPlayer.color = "olive";
                 Console.WriteLine($"PaddleID {myPlayer.side}");
+                me = new Player(id, side);
                 InvokeAsync(StateHasChanged);
             }
         });
@@ -220,6 +259,13 @@
 
         });
 
+        chathubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            //var encodedMsg = $"{user}: {message}";
+            //messages.Add(encodedMsg);
+            InvokeAsync(StateHasChanged);
+        });
+        await chathubConnection.StartAsync();
         await hubConnection.StartAsync();
     }
 
@@ -293,6 +339,10 @@
         {
             await hubConnection.DisposeAsync();
         }
+        if (chathubConnection is not null)
+        {
+            await chathubConnection.DisposeAsync();
+        }
     }
     private void RegularBall()
     {
@@ -328,4 +378,19 @@
         GE.SetState(new RunningState());
     }
     //----------------------------------------
+    private async Task SendChatMessage()
+    {
+        if (userInput is not null && !userInput.Equals(""))
+        {
+            me.name = userInput;
+        }
+        me.SendMessage($"{me.name}: {messageInput}");
+        if (chathubConnection is not null)
+        {
+            await chathubConnection.SendAsync("SendMessage", userInput, messageInput);
+            messageInput = "";
+        }
+    }
+    public bool ChatConnected =>
+        chathubConnection?.State == HubConnectionState.Connected;
 }

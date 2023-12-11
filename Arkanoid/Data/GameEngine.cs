@@ -291,6 +291,15 @@ namespace Arkanoid.Data
             this.gameState.Action();
         }
 
+        public void CheatsSetHP(int hp)
+        {
+            this.HP = hp;
+        }
+        public void CheatsSetSize(int size)
+        {
+            this.P1.SetWidth(size);
+            this.P2.SetWidth(size);
+        }
         public Memento CreatePaddle1DefaultX()
         {
             List<int> defaultXState = new List<int> { 200 };
@@ -312,6 +321,5 @@ namespace Arkanoid.Data
         {
             return paddle2Caretaker.Memento;
         }
-        
     }
     }
