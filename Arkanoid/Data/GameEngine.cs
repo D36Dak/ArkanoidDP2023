@@ -8,6 +8,7 @@ using Arkanoid.Data.State;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Data.Tiles.Decorator;
+using Arkanoid.Data.Visitor;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -31,14 +32,12 @@ namespace Arkanoid.Data
         private System.Timers.Timer? timer;
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
-        public MovableManager movableManager = new();
-        public MovableManager movableManager = new();
-        
+        public MovableManager movableManager = new();  
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
         public IGameState gameState { get; private set; }
-
-       
+        public int Score { get; set; }
+        public IVisitor visitor { get; set; } = new PositionVisitor();
 
         private GameEngine()
         {
@@ -110,11 +109,11 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach(var movable in movableManager.GetMovables())
+           MovableIterator iterator = movableManager.CreateIterator();
+            for (var element = iterator.First(); !iterator.IsDone(); element = iterator.Next())
             {
                 ((IMovable)element).Move();
             }
-            
             //foreach (var movable in movables)
             //{
             //    movable.Move();
