@@ -8,6 +8,7 @@ using Arkanoid.Data.State;
 using Arkanoid.Data.Strategy;
 using Arkanoid.Data.Tiles;
 using Arkanoid.Data.Tiles.Decorator;
+using Arkanoid.Data.Visitor;
 using Arkanoid.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -36,8 +37,8 @@ namespace Arkanoid.Data
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
         public IGameState gameState { get; private set; }
-
-       
+        public int Score { get; set; }
+        public IVisitor visitor { get; set; } = new PositionVisitor();
 
         private GameEngine()
         {
@@ -114,7 +115,6 @@ namespace Arkanoid.Data
             {
                 ((IMovable)element).Move();
             }
-            
             //foreach (var movable in movables)
             //{
             //    movable.Move();

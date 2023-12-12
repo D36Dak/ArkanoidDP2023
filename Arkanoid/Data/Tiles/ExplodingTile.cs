@@ -1,4 +1,5 @@
 ﻿using Arkanoid.Data.Tiles.Decorator;
+using Arkanoid.Data.Visitor;
 using System.Numerics;
 
 namespace Arkanoid.Data.Tiles
@@ -7,6 +8,11 @@ namespace Arkanoid.Data.Tiles
     {
         public ExplodingTile(Ball ball, string color, Vector2 position) : base(ball, color, position)
         {
+        }
+
+        public void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
         }
 
         public override void BounceOff(Component tile, Ball ball)
@@ -22,8 +28,10 @@ namespace Arkanoid.Data.Tiles
 
         public override void Destroy(Component tile, Ball ball)
         {
+
             var GE = GameEngine.GetInstance();
-            var tilesInRadius = GE.GetTilesInRadius(tile, 420);
+            Accept(GE.visitor);
+            var tilesInRadius = GE.GetTilesInRadius(tile, 200);
             foreach(var t in tilesInRadius)
             {
                 GE.tm.DestroyTile(t);
@@ -50,5 +58,6 @@ namespace Arkanoid.Data.Tiles
 
             return newTile;
         }
+       
     }
 }
