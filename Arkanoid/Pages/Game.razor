@@ -322,7 +322,7 @@
     }
     private async Task Subscribe()
     {
-        if (hubConnection is not null)
+        if (hubConnection is not null && myPlayer is null)
         {
             string? id = hubConnection.ConnectionId;
             if (id != null)
