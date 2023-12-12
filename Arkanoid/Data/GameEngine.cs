@@ -32,7 +32,6 @@ namespace Arkanoid.Data
         private TileFactory tf = new TileFactory();
         private static object ThreadLock = new();
         public MovableManager movableManager = new();
-        public MovableManager movableManager = new();
         
         public List<PowerUp> visiblePowerUps = new List<PowerUp>();
         public int HP { get; private set; }
@@ -110,7 +109,8 @@ namespace Arkanoid.Data
         }
         private void TimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
         {
-            foreach(var movable in movableManager.GetMovables())
+            MovableIterator movableIterator = movableManager.CreateIterator();
+            for (var element = movableIterator.First(); !movableIterator.IsDone(); element = movableIterator.Next())
             {
                 ((IMovable)element).Move();
             }
