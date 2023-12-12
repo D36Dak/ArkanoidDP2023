@@ -1,4 +1,5 @@
 ﻿using Arkanoid.Data.Tiles.Decorator;
+using Arkanoid.Data.Visitor;
 using System.Drawing;
 using System.Numerics;
 
@@ -9,6 +10,11 @@ namespace Arkanoid.Data.Tiles
         public RegularTile(Ball ball, string color, Vector2 position, int hp = 1) : base(ball, color, position, hp)
         {
         }
+
+        public void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
+        }   
 
         public override void BounceOff(Component tile, Ball ball)
         {
@@ -24,6 +30,7 @@ namespace Arkanoid.Data.Tiles
         }
         public override void Destroy(Component tile, Ball ball)
         {
+            Accept(GameEngine.GetInstance().visitor);
             GameEngine.GetInstance().tm?.DestroyTile(tile);
         }
 

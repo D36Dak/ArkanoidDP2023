@@ -1,5 +1,6 @@
 ﻿using Arkanoid.Data.PowerUps;
 ﻿using Arkanoid.Data.Tiles.Decorator;
+using Arkanoid.Data.Visitor;
 using System.Drawing;
 using System.Numerics;
 
@@ -11,8 +12,13 @@ namespace Arkanoid.Data.Tiles
         {
         }
 
+        public void Accept(IVisitor visitor)
+        {
+            visitor.Visit(this);
+        }
         public override void BounceOff(Component tile, Ball ball)
         {
+            Accept(GameEngine.GetInstance().visitor);
             var bounceDir = Linear.GetBounceOffDirection(tile, ball);
             GameEngine.GetInstance().InvertBallDirection(bounceDir);
         }
